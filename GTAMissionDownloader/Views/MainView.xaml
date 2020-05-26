@@ -1,0 +1,502 @@
+﻿<mah:MetroWindow x:Class="GTAMissionDownloader.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:cal="http://www.caliburnproject.org"
+        mc:Ignorable="d"
+        Title="{Binding AppTitle, Mode=OneTime}" TitleCharacterCasing="Normal"
+        Height="430" Width="740" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" 
+        WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
+        Icon="{Binding IconPath}" 
+        cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged]">
+
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl>
+            <mah:Flyout IsOpen="{Binding IsServerFlyOutOpened}" Position="Bottom" Theme="Adapt" IsModal="True" Height="177">
+                <mah:Flyout.Header>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <iconPacks:PackIconMaterial Kind="Settings" VerticalAlignment="Center"/>
+
+                        <TextBlock Text="Servers Settings:" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                    </StackPanel>
+                </mah:Flyout.Header>
+
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="S1:" FontWeight="Bold"/>
+
+                        <TextBox Text="{Binding S1AddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="Server 1 Address..." Width="250" ToolTip="Insert Sever 1 Address"/>
+
+                        <TextBox Text="{Binding S1PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="Server 1 Port..." Width="210" ToolTip="Insert Sever 1 Port" Margin="2 0 0 0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                        <Label Content="S2:" FontWeight="Bold"/>
+
+                        <TextBox Text="{Binding S2AddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="Server 2 Address..." Width="250" ToolTip="Insert Sever 2 Address"/>
+
+                        <TextBox Text="{Binding S2PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="Server 2 Port..." Width="210" ToolTip="Insert Sever 2 Port" Margin="2 0 0 0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                        <Label Content="S3:" FontWeight="Bold"/>
+
+                        <TextBox Text="{Binding S3AddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="Server 3 Address..." Width="250" ToolTip="Insert Sever 3 Address"/>
+
+                        <TextBox Text="{Binding S3PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="Server 3 Port..." Width="210" ToolTip="Insert Sever 3 Port" Margin="2 0 0 0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                        <Label Content="TS:" FontWeight="Bold"/>
+
+                        <TextBox Text="{Binding TsAddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="TeamSpeak Address..." Width="250" ToolTip="Insert TeamSpeak Address"/>
+
+                        <TextBox Text="{Binding TsSelectorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                 mah:TextBoxHelper.Watermark="TeamSpeak Selector..." Width="210" ToolTip="Insert TeamSpeak Selector" Margin="2 0 0 0"/>
+
+                        <Button cal:Message.Attach="[Event Click] = [Action FlyOutInfoClick()]" Margin="2 0 0 0">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Information" Height="15" Width="15"/>
+
+                                <TextBlock Text="Info" VerticalAlignment="Center" Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </mah:Flyout>
+
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
+
+    <TabControl mah:TabControlHelper.Underlined="TabItems" SelectedIndex="{Binding TabControlSelectedIndex}"
+                cal:Message.Attach="[Event SelectionChanged] = [Action TabControlSelectionChanged($args)]">
+        <TabControl.Resources>
+            <Style BasedOn="{StaticResource MahApps.Styles.TabItem}" TargetType="{x:Type TabItem}">
+                <Setter Property="mah:HeaderedControlHelper.HeaderFontSize" Value="20"/>
+            </Style>
+        </TabControl.Resources>
+
+        <TabItem Header="Mission File">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="1" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center">
+                    <TextBlock Text="GTA Mission Downloader" TextAlignment="Center" FontSize="20"
+                               FontWeight="Bold" />
+
+                    <TextBlock Text="{Binding ProgramStatus}" TextAlignment="Center" FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ProgramStatus}" Value="Updated">
+                                        <Setter Property="TextBlock.Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ProgramStatus}" Value="Outdated">
+                                        <Setter Property="TextBlock.Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <Button Grid.Column="1" Grid.Row="1" x:Name="ReadChangelog"
+                        HorizontalAlignment="Center" VerticalAlignment="Top"
+                        ToolTip="Read the changelog" Margin="315 0 0 0">
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconMaterial Kind="FileDocument" Height="11" Width="11" VerticalAlignment="Center"/>
+
+                        <TextBlock Text="Changelog" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="1" Grid.Row="1" x:Name="UpdateProgramAsync"
+                        HorizontalAlignment="Center" VerticalAlignment="Top"
+                        Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="453 0 0 0">
+                    <StackPanel Orientation="Horizontal">
+                        <iconPacks:PackIconMaterial Kind="Download" Height="11" Width="11" VerticalAlignment="Center"/>
+
+                        <TextBlock Text="Update" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                    </StackPanel>
+                </Button>
+
+                <ListView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding MissionItems}"
+                          IsEnabled="{Binding IsLvEnabled}" cal:Message.Attach="[Event MouseDown] = [Action LvMouseDown($view, $mousepoint)]"
+                          BorderThickness="1.000001" Margin="0 1 0 0">
+
+                    <ListView.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource MahApps.Styles.ListViewItem}" TargetType="{x:Type ListViewItem}">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+
+                            <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=ListView}}" />
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Download" cal:Message.Attach="DownloadMission" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
+                                            <MenuItem.Icon>
+                                                <iconPacks:PackIconMaterial Kind="Download" HorizontalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+
+                                        <MenuItem Header="Delete" cal:Message.Attach="DeleteMission" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
+                                            <MenuItem.Icon>
+                                                <iconPacks:PackIconMaterial Kind="TrashCanOutline" HorizontalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.View>
+                        <GridView>
+                            <GridView.ColumnHeaderContainerStyle>
+                                <Style BasedOn="{StaticResource MahApps.Styles.GridViewColumnHeader}" TargetType="{x:Type GridViewColumnHeader}">
+                                    <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                </Style>
+                            </GridView.ColumnHeaderContainerStyle>
+
+                            <GridViewColumn Header="Mission File:" Width="250">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Mission}">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMissionUpdated}" Value="Updated">
+                                                            <Setter Property="TextBlock.Foreground" Value="Green"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsMissionUpdated}" Value="Outdated">
+                                                            <Setter Property="TextBlock.Foreground" Value="Red"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsMissionUpdated}" Value="Missing">
+                                                            <Setter Property="TextBlock.Foreground" Value="#e68a00"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn>
+                                <GridViewColumnHeader Content="Last Modified:" ToolTip="Shows the modified time from GTA's Google Drive"/>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ModifiedTime}">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsModifiedTimeUpdated}" Value="Updated">
+                                                            <Setter Property="TextBlock.Foreground" Value="Green"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsModifiedTimeUpdated}" Value="Outdated">
+                                                            <Setter Property="TextBlock.Foreground" Value="Red"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsModifiedTimeUpdated}" Value="Missing">
+                                                            <Setter Property="TextBlock.Foreground" Value="#e68a00"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn>
+                                <GridViewColumnHeader Content="Subscribe?" ToolTip="Add the selected Mission file(s) to the queue"/>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsChecked}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Width="280">
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Button cal:Message.Attach="[Event Click] = [Action InfoClick()]">
+                                            <StackPanel Orientation="Horizontal">
+                                                <iconPacks:PackIconMaterial Kind="Information" Height="15" Width="15"/>
+
+                                                <TextBlock Text="Info" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate />
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 4 0 0">
+                    <TextBlock Text="{Binding DownloadInfoText}" FontSize="14" FontWeight="Bold"
+                               TextAlignment="Center" VerticalAlignment="Center"/>
+
+                    <Button x:Name="StopDownload" Visibility="{Binding IsStopDownloadVisible}"
+                            ToolTip="Stop the current download" Margin="2 0 0 0">
+                        <iconPacks:PackIconMaterial Kind="StopCircleOutline" Height="12" Width="12"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Servers">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal"
+                            VerticalAlignment="{Binding ServersVerticalAlignment}" HorizontalAlignment="Center">
+                    <GroupBox>
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <iconPacks:PackIconMaterial Kind="Server"/>
+
+                                    <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Servers"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+
+                        <StackPanel>
+                            <Button x:Name="JoinServer1" IsEnabled="{Binding IsJoinServer1Enabled}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="WheelchairAccessibility" VerticalAlignment="Center"/>
+
+                                    <TextBlock Text="Join Server 1" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="JoinServer2" IsEnabled="{Binding IsJoinServer2Enabled}" Margin="0 5 0 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="HumanHandsup" VerticalAlignment="Center"/>
+
+                                    <TextBlock Text="Join Server 2" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="JoinServer3" IsEnabled="{Binding IsJoinServer3Enabled}" Margin="0 5 0 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="SwordCross" VerticalAlignment="Center"/>
+
+                                    <TextBlock Text="Join Server 3" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="JoinTs" IsEnabled="{Binding IsJoinTsEnabled}" Margin="0 5 0 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="Headset" VerticalAlignment="Center"/>
+
+                                    <TextBlock Text="Join TS" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Height="170" Width="550" Margin="5 0 0 0">
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <iconPacks:PackIconMaterial Kind="ThumbUp"/>
+
+                                    <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Status"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Width="485">
+                                <TextBlock Text="{Binding Server1Info}" Margin="0 7 0 0"/>
+
+                                <TextBlock Text="{Binding Server2Info}" Margin="0 18 0 0"/>
+
+                                <TextBlock Text="{Binding Server3Info}" Margin="0 20 0 0"/>
+
+                                <TextBlock Text="{Binding TsInfo}" Margin="0 20 0 0"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                <Button x:Name="ShowServersSettings" ToolTip="Show Servers settings">
+                                    <iconPacks:PackIconMaterial Kind="Settings" VerticalAlignment="Center"/>
+                                </Button>
+
+                                <Expander IsExpanded="{Binding IsExpanderOpened, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Height="26" Width="26" RenderTransformOrigin="0.5,0.5"
+                                          mah:HeaderedControlHelper.HeaderBackground="{x:Null}" mah:HeaderedControlHelper.HeaderForeground="{Binding ExpanderColor}"  BorderThickness="0"
+                                          ToolTip="Show/Hide TeamSpeak window">
+                                    <Expander.RenderTransform>
+                                        <TransformGroup>
+                                            <RotateTransform Angle="90"/>
+                                        </TransformGroup>
+                                    </Expander.RenderTransform>
+                                </Expander>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Options">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <GroupBox>
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <iconPacks:PackIconMaterial Kind="Menu" />
+
+                                    <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Options" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="1" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                            </Grid.RowDefinitions>
+
+                            <GroupBox Grid.Column="1" Grid.Row="0">
+                                <GroupBox.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <iconPacks:PackIconMaterial Kind="ThemeLightDark" />
+
+                                            <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Theme and Accent" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GroupBox.HeaderTemplate>
+
+                                <StackPanel HorizontalAlignment="Center">
+                                    <mah:ToggleSwitch IsChecked="{Binding ThemeToggleSwitch}" OnLabel="Light" OffLabel="Dark"/>
+
+                                    <ComboBox x:Name="Accents" SelectedItem="{Binding SelectedAccent}" SelectedIndex="{Binding SelectedAccentIndex}"
+                                              DisplayMemberPath="ColorName"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Grid.Column="1" Grid.Row="1" Margin="0 5 0 0">
+                                <GroupBox.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <iconPacks:PackIconMaterial Kind="Settings" />
+
+                                            <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="General" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GroupBox.HeaderTemplate>
+
+                                <StackPanel>
+                                    <CheckBox Content="Startup" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
+                                              HorizontalAlignment="Center" ToolTip="Run the program automatically upon PC restart"/>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <CheckBox Content="Hidden" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run"/>
+
+                                        <CheckBox Content="TS" IsChecked="{Binding IsTsChecked}" Margin="5 0 0 0"
+                                                  ToolTip="Run TeamSpeak automatically upon the program start"/>
+                                    </StackPanel>
+
+                                    <CheckBox Content="Automatic Update" IsChecked="{Binding IsAutomaticUpdateChecked}" Margin="0 2 0 0"
+                                              ToolTip="Automatically updates the ticked mission files"/>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 0">
+                                        <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">
+                                            <Image Source="{Binding IconPath}" Height="20" Width="20" 
+                                                   RenderTransformOrigin="0.5,0.5" />
+                                        </Button>
+
+                                        <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="3 0 0 0">
+                                            <iconPacks:PackIconMaterial Kind="FileMultiple"/>
+                                        </Button>
+
+                                        <Button x:Name="ManualDownload" ToolTip="Open the App download link" Margin="3 0 0 0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <iconPacks:PackIconMaterial Kind="ArrowTopRight" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+
+                                    <Button x:Name="BrowseOfficialThread" HorizontalAlignment="Center" ToolTip="Browse the Official thread"
+                                            Margin="0 3 0 0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="FileDocument" VerticalAlignment="Center"/>
+
+                                            <TextBlock Text="Thread" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </GroupBox>
+
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</mah:MetroWindow>

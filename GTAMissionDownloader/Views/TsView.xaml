@@ -1,0 +1,106 @@
+﻿<controls:MetroWindow x:Class="GTAMissionDownloader.Views.TsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        Title="TeamSpeak Channels" TitleCharacterCasing="Normal"
+        d:DesignHeight="350" d:DesignWidth="310"
+        ResizeMode="CanResize" WindowStartupLocation="Manual" ShowMinButton="False" ShowMaxRestoreButton="False" ShowCloseButton="False"
+        Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        Top="{Binding Top, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Left="{Binding Left, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SourceInitialized="Window_SourceInitialized"
+        cal:Message.Attach="[Event SizeChanged] = [Action WindowSizeChanged]">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="5"/>
+        </Grid.RowDefinitions>
+
+        <ListView Grid.Column="1" Grid.Row="1" SelectionMode="Single" SelectedItem="{Binding SelectedItem}"
+                  BorderThickness="1.000001" ItemsSource="{Binding TsItems}" AllowDrop="True"
+                  cal:Message.Attach="[Event PreviewKeyDown] = [Action LvItemHotKeys($eventArgs)]; 
+                                      [Event PreviewDrop] = [Action PathDropLv($eventArgs)];
+                                      [Event MouseDown] = [Action LvMouseDown($view, $mousepoint)];
+                                      [Event PreviewMouseMove] = [Action LvMouseMoveDragDrop($view)];
+                                      [Event MouseEnter] = [Action LvMouseEnter($source)]"
+
+                  ToolTip="Add,copy and remove channel paths, right click to open the menu or hotkeys - ctrl+c, ctrl+v, delete">
+
+            <ListView.ContextMenu>
+                <ContextMenu cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Add" cal:Message.Attach="AddFile" InputGestureText="| CTRL + V">
+                        <MenuItem.Icon>
+                            <iconPacks:PackIconMaterial Kind="Plus" HorizontalAlignment="Center"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <MenuItem Header="Copy" cal:Message.Attach="CopyPath" InputGestureText="| CTRL + C">
+                        <MenuItem.Icon>
+                            <iconPacks:PackIconMaterial Kind="ContentCopy" HorizontalAlignment="Center"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <MenuItem Header="Delete" cal:Message.Attach="DeletePath" InputGestureText="| DEL">
+                        <MenuItem.Icon>
+                            <iconPacks:PackIconMaterial Kind="Delete" HorizontalAlignment="Center"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListView.ContextMenu>
+
+            <ListView.ItemContainerStyle>
+                <Style BasedOn="{StaticResource MahApps.Styles.ListViewItem}" TargetType="{x:Type ListViewItem}">
+                    <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.View>
+                <GridView>
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style BasedOn="{StaticResource MahApps.Styles.GridViewColumnHeader}" TargetType="{x:Type GridViewColumnHeader}">
+                            <Setter Property="controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+
+                    <GridViewColumn Header="Channel Path(s):" Width="{Binding ColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    DisplayMemberBinding="{Binding ChannelPath}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Column="1" Grid.Row="2">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="40" Margin="0 5 0 0">
+                <TextBox Text="{Binding TsChannelNameText}" TextWrapping="Wrap" AllowDrop="True"
+                         cal:Message.Attach="[Event PreviewDrop] = [Action DropChannelName($eventArgs)]"
+
+                         controls:TextBoxHelper.Watermark="Your channel path..." controls:TextBoxHelper.ClearTextButton="True"
+                         ToolTip="Insert the FULL path to the TS channel (It's case-sensitive!) e.g. Staff Lounges/Waiting for Support"/>
+            </ScrollViewer>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="40" Margin="0 5 0 0">
+                <TextBox Text="{Binding TsChannelPasswordText}" TextWrapping="Wrap"
+                         cal:Message.Attach="[Event PreviewDrop] = [Action DropChannelPassword($eventArgs)]" 
+                         
+                         controls:TextBoxHelper.Watermark="Your channel password..." controls:TextBoxHelper.ClearTextButton="True"
+                         ToolTip="Insert the password to the channel or leave it empty"/>
+            </ScrollViewer>
+        </StackPanel>
+
+    </Grid>
+</controls:MetroWindow>
