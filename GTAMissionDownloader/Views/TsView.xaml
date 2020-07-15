@@ -9,10 +9,18 @@
         mc:Ignorable="d"
         Title="TeamSpeak Channels" TitleCharacterCasing="Normal"
         d:DesignHeight="350" d:DesignWidth="310"
-        ResizeMode="CanResize" WindowStartupLocation="Manual" ShowMinButton="False" ShowMaxRestoreButton="False" ShowCloseButton="False"
+        WindowStartupLocation="Manual" ShowMinButton="False" ShowMaxRestoreButton="False"
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         Top="{Binding Top, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Left="{Binding Left, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SourceInitialized="Window_SourceInitialized"
-        cal:Message.Attach="[Event SizeChanged] = [Action WindowSizeChanged]">
+        cal:Message.Attach="[Event SizeChanged] = [Action WindowSizeChanged];
+                            [Event Closing] = [Action OnClose];">
+
+    <controls:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <iconPacks:PackIconMaterial Kind="Headset" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Margin="10 0 0 0"/>
+        </DataTemplate>
+    </controls:MetroWindow.IconTemplate>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -86,17 +94,15 @@
 
         <StackPanel Grid.Column="1" Grid.Row="2">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Height="40" Margin="0 5 0 0">
-                <TextBox Text="{Binding TsChannelNameText}" TextWrapping="Wrap" AllowDrop="True"
+                <TextBox Text="{Binding TsChannelNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AllowDrop="True"
                          cal:Message.Attach="[Event PreviewDrop] = [Action DropChannelName($eventArgs)]"
-
                          controls:TextBoxHelper.Watermark="Your channel path..." controls:TextBoxHelper.ClearTextButton="True"
                          ToolTip="Insert the FULL path to the TS channel (It's case-sensitive!) e.g. Staff Lounges/Waiting for Support"/>
             </ScrollViewer>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Height="40" Margin="0 5 0 0">
-                <TextBox Text="{Binding TsChannelPasswordText}" TextWrapping="Wrap"
+                <TextBox Text="{Binding TsChannelPasswordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
                          cal:Message.Attach="[Event PreviewDrop] = [Action DropChannelPassword($eventArgs)]" 
-                         
                          controls:TextBoxHelper.Watermark="Your channel password..." controls:TextBoxHelper.ClearTextButton="True"
                          ToolTip="Insert the password to the channel or leave it empty"/>
             </ScrollViewer>

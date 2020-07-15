@@ -28,7 +28,7 @@ namespace GTAMissionDownloader.Classes
             listRequest.Q = $"'{Properties.FolderId}' in parents";
             var files = await listRequest.ExecuteAsync();
 
-            files.Files.Remove(files.Files.Single(r => r.Name == "readme.txt"));
+            files.Files.Remove(files.Files.SingleOrDefault(r => r.Name == "readme.txt"));
 
             if (_mvm.MissionItems.Count > 0)
             {
@@ -43,7 +43,8 @@ namespace GTAMissionDownloader.Classes
                 if (_mvm.MissionItems.Count < files.Files.Count)
                     foreach (var item in files.Files.ToList())
                     {
-                        if (_mvm.MissionItems.Any(a => a.Mission == item.Name)) continue;
+                        if (_mvm.MissionItems.Any(a => a.Mission == item.Name)) 
+                            continue;
 
                         int itemPosition = files.Files.IndexOf(item);
                         _mvm.MissionItems.Insert(itemPosition, new ListViewModel()
@@ -150,7 +151,7 @@ namespace GTAMissionDownloader.Classes
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked);
+                var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked).ToList();
                 if (!checkedItems.Any())
                 {
                     await Task.Delay(5_000);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -90,17 +91,7 @@ namespace GTAMissionDownloader.ViewModels
 
         public void WindowSizeChanged() => ColumnWidth = Width - 20;
 
-        private BindableCollection<TsModel> _tsItems = new BindableCollection<TsModel>();
-        public BindableCollection<TsModel> TsItems
-        {
-            get => _tsItems;
-            set
-            {
-                _tsItems = value;
-
-                NotifyOfPropertyChange(() => TsItems);
-            }
-        }
+        public BindableCollection<TsModel> TsItems { get; set; } = new BindableCollection<TsModel>();
 
         private TsModel _selectedItem;
         public TsModel SelectedItem
@@ -240,6 +231,7 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
+        public void OnClose() => _mvm.IsExpanderOpened = false;
         public async Task CloseWindow() => await TryCloseAsync();
     }
 }

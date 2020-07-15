@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using Caliburn.Micro;
 
 namespace GTAMissionDownloader.Models
 {
@@ -30,6 +26,5 @@ namespace GTAMissionDownloader.Models
 
             handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }

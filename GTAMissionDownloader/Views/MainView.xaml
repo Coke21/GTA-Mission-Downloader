@@ -3,82 +3,70 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:cal="http://www.caliburnproject.org"
         mc:Ignorable="d"
         Title="{Binding AppTitle, Mode=OneTime}" TitleCharacterCasing="Normal"
-        Height="430" Width="740" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" 
+        Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        MinHeight="430" MinWidth="300" WindowStartupLocation="CenterScreen"
         WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
         Icon="{Binding IconPath}" 
-        cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged]">
+        cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged];
+                            [Event SizeChanged] = [Action WindowSizeChanged];" ShowMaxRestoreButton="False">
 
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
-            <mah:Flyout IsOpen="{Binding IsServerFlyOutOpened}" Position="Bottom" Theme="Adapt" IsModal="True" Height="177">
+            <mah:Flyout IsOpen="{Binding IsServerFlyOutOpened}" Position="Top" Theme="Adapt" IsModal="True">
                 <mah:Flyout.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <iconPacks:PackIconMaterial Kind="Settings" VerticalAlignment="Center"/>
+                        <iconPacks:PackIconMaterial Kind="HeadphonesSettings" VerticalAlignment="Center"/>
 
-                        <TextBlock Text="Servers Settings:" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                        <TextBlock Text="TeamSpeak Settings:" VerticalAlignment="Center" Margin="2 0 0 0"/>
                     </StackPanel>
                 </mah:Flyout.Header>
 
-                <StackPanel VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="S1:" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="TeamSpeak Selector:" FontWeight="Bold"/>
 
-                        <TextBox Text="{Binding S1AddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="Server 1 Address..." Width="250" ToolTip="Insert Sever 1 Address"/>
+                            <TextBox Text="{Binding TsSelectorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                     mah:TextBoxHelper.Watermark="TeamSpeak Selector..." Width="440" ToolTip="Insert TeamSpeak Selector"/>
+                        </StackPanel>
 
-                        <TextBox Text="{Binding S1PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="Server 1 Port..." Width="210" ToolTip="Insert Sever 1 Port" Margin="2 0 0 0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                            <Label Content="TeamSpeak Selector URL:" FontWeight="Bold"/>
+
+                            <TextBox Text="{Binding TsSelectorUrlText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                     mah:TextBoxHelper.Watermark="TeamSpeak Selector URL..." Width="415" ToolTip="Insert TeamSpeak Selector URL"/>
+                        </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
-                        <Label Content="S2:" FontWeight="Bold"/>
+                    <Button cal:Message.Attach="[Event Click] = [Action AddTs()]" VerticalAlignment="Center" Margin="2 0 0 0">
+                        <StackPanel Orientation="Horizontal">
+                            <iconPacks:PackIconMaterial Kind="Plus" VerticalAlignment="Center"/>
 
-                        <TextBox Text="{Binding S2AddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="Server 2 Address..." Width="250" ToolTip="Insert Sever 2 Address"/>
+                            <TextBlock Text="Add Ts" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                        </StackPanel>
+                    </Button>
 
-                        <TextBox Text="{Binding S2PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="Server 2 Port..." Width="210" ToolTip="Insert Sever 2 Port" Margin="2 0 0 0"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
-                        <Label Content="S3:" FontWeight="Bold"/>
-
-                        <TextBox Text="{Binding S3AddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="Server 3 Address..." Width="250" ToolTip="Insert Sever 3 Address"/>
-
-                        <TextBox Text="{Binding S3PortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="Server 3 Port..." Width="210" ToolTip="Insert Sever 3 Port" Margin="2 0 0 0"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
-                        <Label Content="TS:" FontWeight="Bold"/>
-
-                        <TextBox Text="{Binding TsAddressText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="TeamSpeak Address..." Width="250" ToolTip="Insert TeamSpeak Address"/>
-
-                        <TextBox Text="{Binding TsSelectorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                 mah:TextBoxHelper.Watermark="TeamSpeak Selector..." Width="210" ToolTip="Insert TeamSpeak Selector" Margin="2 0 0 0"/>
-
-                        <Button cal:Message.Attach="[Event Click] = [Action FlyOutInfoClick()]" Margin="2 0 0 0">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Kind="Information" Height="15" Width="15"/>
-
-                                <TextBlock Text="Info" VerticalAlignment="Center" Margin="5 0 0 0"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
+                    <Expander IsExpanded="{Binding IsExpanderOpened, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Height="26" Width="26" RenderTransformOrigin="0.5,0.5" BorderThickness="0"
+                              mah:HeaderedControlHelper.HeaderBackground="{x:Null}" mah:HeaderedControlHelper.HeaderForeground="{Binding ExpanderColor}" 
+                              ToolTip="Show/Hide TeamSpeak window">
+                        <Expander.RenderTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="90"/>
+                            </TransformGroup>
+                        </Expander.RenderTransform>
+                    </Expander>
                 </StackPanel>
             </mah:Flyout>
-
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
 
-    <TabControl mah:TabControlHelper.Underlined="TabItems" SelectedIndex="{Binding TabControlSelectedIndex}"
+    <TabControl mah:TabControlHelper.Underlined="TabItems" SelectedIndex="{Binding TabControlSelectedIndex}" Style="{DynamicResource MahApps.Styles.TabControl.Animated}"
                 cal:Message.Attach="[Event SelectionChanged] = [Action TabControlSelectionChanged($args)]">
         <TabControl.Resources>
             <Style BasedOn="{StaticResource MahApps.Styles.TabItem}" TargetType="{x:Type TabItem}">
@@ -183,7 +171,7 @@
                                 </Style>
                             </GridView.ColumnHeaderContainerStyle>
 
-                            <GridViewColumn Header="Mission File:" Width="250">
+                            <GridViewColumn Header="Mission File:" Width="{Binding MissionColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Mission}">
@@ -241,14 +229,12 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="280">
+                            <GridViewColumn>
                                 <GridViewColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <Button cal:Message.Attach="[Event Click] = [Action InfoClick()]">
+                                        <Button cal:Message.Attach="[Event Click] = [Action InfoClick()]" Style="{DynamicResource MahApps.Styles.Button.Circle}">
                                             <StackPanel Orientation="Horizontal">
-                                                <iconPacks:PackIconMaterial Kind="Information" Height="15" Width="15"/>
-
-                                                <TextBlock Text="Info" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                                <iconPacks:PackIconMaterial Kind="Information"/>
                                             </StackPanel>
                                         </Button>
                                     </DataTemplate>
@@ -279,107 +265,125 @@
         <TabItem Header="Servers">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="1" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="1" />
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="1" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal"
-                            VerticalAlignment="{Binding ServersVerticalAlignment}" HorizontalAlignment="Center">
+                <ScrollViewer Grid.Column="1" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     <GroupBox>
                         <GroupBox.HeaderTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <iconPacks:PackIconMaterial Kind="Server"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                                    <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Servers"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <iconPacks:PackIconMaterial Kind="Server"/>
+
+                                        <TextBlock Text="Servers" FontWeight="Bold" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="1" cal:Message.Attach="[Event Click] = [Action ShowTeamSpeakSettings()]" Style="{DynamicResource MahApps.Styles.Button.Circle}"
+                                            ToolTip="Show TeamSpeak settings">
+                                        <iconPacks:PackIconMaterial Kind="HeadphonesSettings"/>
+                                    </Button>
+
+                                    <Button Grid.Column="2" cal:Message.Attach="[Event Click] = [Action ShowServersInfo()]" Style="{DynamicResource MahApps.Styles.Button.Circle}"
+                                            ToolTip="Show Servers information" Margin="2 0 0 0">
+                                        <iconPacks:PackIconMaterial Kind="Information"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </GroupBox.HeaderTemplate>
 
-                        <StackPanel>
-                            <Button x:Name="JoinServer1" IsEnabled="{Binding IsJoinServer1Enabled}">
-                                <StackPanel Orientation="Horizontal">
-                                    <iconPacks:PackIconMaterial Kind="WheelchairAccessibility" VerticalAlignment="Center"/>
+                        <ItemsControl ItemsSource="{Binding Servers}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0 0 0 2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="200"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="Join Server 1" VerticalAlignment="Center" Margin="2 0 0 0"/>
-                                </StackPanel>
-                            </Button>
+                                        <Button Grid.Column="0" Content="{Binding ContentButton}" IsEnabled="{Binding IsJoinButtonEnabled}"
+                                                cal:Message.Attach="[Event Click] = [Action JoinServer($dataContext)]"/>
 
-                            <Button x:Name="JoinServer2" IsEnabled="{Binding IsJoinServer2Enabled}" Margin="0 5 0 0">
-                                <StackPanel Orientation="Horizontal">
-                                    <iconPacks:PackIconMaterial Kind="HumanHandsup" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding ServerInfo}" ToolTip="{Binding ToolTip}" FontWeight="Bold"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2 0 0 0"/>
 
-                                    <TextBlock Text="Join Server 2" VerticalAlignment="Center" Margin="2 0 0 0"/>
-                                </StackPanel>
-                            </Button>
+                                        <TextBox Grid.Column="2" Text="{Binding ServerNoteInfo}" mah:TextBoxHelper.Watermark="Your note..."
+                                                 mah:TextBoxHelper.ClearTextButton="True" ToolTip="Type something to remember the server" Margin="2 0 0 0"/>
 
-                            <Button x:Name="JoinServer3" IsEnabled="{Binding IsJoinServer3Enabled}" Margin="0 5 0 0">
-                                <StackPanel Orientation="Horizontal">
-                                    <iconPacks:PackIconMaterial Kind="SwordCross" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                            <Button cal:Message.Attach="[Event Click] = [Action MoveItemUp($dataContext)]" ToolTip="Move this item up" Margin="2 0 0 0">
+                                                <iconPacks:PackIconMaterial Kind="ChevronUp"  VerticalAlignment="Center"/>
+                                            </Button>
 
-                                    <TextBlock Text="Join Server 3" VerticalAlignment="Center" Margin="2 0 0 0"/>
-                                </StackPanel>
-                            </Button>
+                                            <Button cal:Message.Attach="[Event Click] = [Action MoveItemDown($dataContext)]" ToolTip="Move this item down" Margin="2 0 0 0">
+                                                <iconPacks:PackIconMaterial Kind="ChevronDown" VerticalAlignment="Center"/>
+                                            </Button>
+                                        </StackPanel>
 
-                            <Button x:Name="JoinTs" IsEnabled="{Binding IsJoinTsEnabled}" Margin="0 5 0 0">
-                                <StackPanel Orientation="Horizontal">
-                                    <iconPacks:PackIconMaterial Kind="Headset" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="4" cal:Message.Attach="[Event Click] = [Action DeleteServerItem($dataContext)]"
+                                                ToolTip="Delete this item" Margin="2 0 0 0">
+                                            <iconPacks:PackIconMaterial Kind="TrashCanOutline" VerticalAlignment="Center"/>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
 
-                                    <TextBlock Text="Join TS" VerticalAlignment="Center" Margin="2 0 0 0"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
+                            <ItemsControl.Template>
+                                <ControlTemplate TargetType="ItemsControl">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <ItemsPresenter Grid.Row="0" />
+
+                                        <Grid Grid.Row="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Column="0" Text="{Binding ServerIpText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                     mah:TextBoxHelper.ClearTextButton="True"
+                                                     mah:TextBoxHelper.Watermark="Server IP..." ToolTip="Insert Sever IP"/>
+
+                                            <TextBox Grid.Column="1" Text="{Binding ServerQueryPortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
+                                                     mah:TextBoxHelper.Watermark="Server Query Port..." ToolTip="Insert Sever Query Port" Margin="2 0 0 0"/>
+
+                                            <Button Grid.Column="2" cal:Message.Attach="[Event Click] = [Action AddServer()]" Margin="2 0 0 0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <iconPacks:PackIconMaterial Kind="Plus" VerticalAlignment="Center"/>
+
+                                                    <TextBlock Text="Add Server" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ItemsControl.Template>
+
+                        </ItemsControl>
                     </GroupBox>
-
-                    <GroupBox Height="170" Width="550" Margin="5 0 0 0">
-                        <GroupBox.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <iconPacks:PackIconMaterial Kind="ThumbUp"/>
-
-                                    <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Status"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </GroupBox.HeaderTemplate>
-
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel Width="485">
-                                <TextBlock Text="{Binding Server1Info}" Margin="0 7 0 0"/>
-
-                                <TextBlock Text="{Binding Server2Info}" Margin="0 18 0 0"/>
-
-                                <TextBlock Text="{Binding Server3Info}" Margin="0 20 0 0"/>
-
-                                <TextBlock Text="{Binding TsInfo}" Margin="0 20 0 0"/>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                                <Button x:Name="ShowServersSettings" ToolTip="Show Servers settings">
-                                    <iconPacks:PackIconMaterial Kind="Settings" VerticalAlignment="Center"/>
-                                </Button>
-
-                                <Expander IsExpanded="{Binding IsExpanderOpened, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          Height="26" Width="26" RenderTransformOrigin="0.5,0.5"
-                                          mah:HeaderedControlHelper.HeaderBackground="{x:Null}" mah:HeaderedControlHelper.HeaderForeground="{Binding ExpanderColor}"  BorderThickness="0"
-                                          ToolTip="Show/Hide TeamSpeak window">
-                                    <Expander.RenderTransform>
-                                        <TransformGroup>
-                                            <RotateTransform Angle="90"/>
-                                        </TransformGroup>
-                                    </Expander.RenderTransform>
-                                </Expander>
-                            </StackPanel>
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-
+                </ScrollViewer>
             </Grid>
         </TabItem>
 
@@ -432,8 +436,9 @@
                                     </DataTemplate>
                                 </GroupBox.HeaderTemplate>
 
-                                <StackPanel HorizontalAlignment="Center">
-                                    <mah:ToggleSwitch IsChecked="{Binding ThemeToggleSwitch}" OnLabel="Light" OffLabel="Dark"/>
+                                <StackPanel>
+                                    <mah:ToggleSwitch IsOn="{Binding ThemeToggleSwitch}" OnContent="Light" OffContent="Dark" Width="90" 
+                                                      HorizontalAlignment="Center"/>
 
                                     <ComboBox x:Name="Accents" SelectedItem="{Binding SelectedAccent}" SelectedIndex="{Binding SelectedAccentIndex}"
                                               DisplayMemberPath="ColorName"/>
@@ -444,7 +449,7 @@
                                 <GroupBox.HeaderTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <iconPacks:PackIconMaterial Kind="Settings" />
+                                            <iconPacks:PackIconMaterial Kind="Cog" />
 
                                             <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="General" />
                                         </StackPanel>
@@ -475,7 +480,7 @@
                                             <iconPacks:PackIconMaterial Kind="FileMultiple"/>
                                         </Button>
 
-                                        <Button x:Name="ManualDownload" ToolTip="Open the App download link" Margin="3 0 0 0">
+                                        <Button x:Name="ManualDownload" ToolTip="Manually download the app" Margin="3 0 0 0">
                                             <StackPanel Orientation="Horizontal">
                                                 <iconPacks:PackIconMaterial Kind="ArrowTopRight" VerticalAlignment="Center"/>
                                             </StackPanel>

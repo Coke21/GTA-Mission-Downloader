@@ -2,18 +2,19 @@
 using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
+using ControlzEx.Theming;
 using GTADownloader;
 using GTAMissionDownloader.Classes;
 using GTAMissionDownloader.Models;
 using GTAMissionDownloader.Views;
 using Hardcodet.Wpf.TaskbarNotification;
-using MahApps.Metro;
 using Point = System.Windows.Point;
 
 namespace GTAMissionDownloader.ViewModels
@@ -23,6 +24,30 @@ namespace GTAMissionDownloader.ViewModels
         public string AppTitle => $"GTA Mission Downloader | {Properties.AppVersion} by Coke";
         public string IconPath => "/Images/gtaIcon.ico";
         public string WindowName => "PrimaryWindow";
+
+        private double _height;
+        public double Height
+        {
+            get { return _height; }
+            set
+            {
+                _height = value;
+
+                NotifyOfPropertyChange(() => Height);
+            }
+        }
+
+        private double _width;
+        public double Width
+        {
+            get { return _width; }
+            set
+            {
+                _width = value;
+
+                NotifyOfPropertyChange(() => Width);
+            }
+        }
 
         private WindowState windowState;
         public WindowState WindowState
@@ -70,6 +95,12 @@ namespace GTAMissionDownloader.ViewModels
             TsViewModel.TsVm.Left = win.Left + win.ActualWidth + 1;
         }
 
+        public void WindowSizeChanged()
+        {
+            MissionColumnWidth = Width / 2.5;
+            WindowLocationChanged();
+        } 
+
         public MainViewModel()
         {
             WindowState = WindowState.Normal;
@@ -87,21 +118,16 @@ namespace GTAMissionDownloader.ViewModels
 
             Persistence.Tracker.Configure<MainViewModel>()
                 .Id(p => p.WindowName, includeType: false)
+                .Property(p => p.Height, 430, "Window Height")
+                .Property(p => p.Width, 740, "Window Width")
 
                 .Property(p => p.MissionItems, "Saved Mission file(s)")
+                .Property(p => p.MissionColumnWidth, 300, "Column Width")
+
                 .Property(p => p.Accents, "Accent items")
 
-                .Property(p => p.S1AddressText, "164.132.200.53", "Server 1 Address")
-                .Property(p => p.S1PortText, "2302", "Server 1 Port")
-
-                .Property(p => p.S2AddressText, "164.132.202.63", "Server 2 Address")
-                .Property(p => p.S2PortText, "2602", "Server 2 Port")
-
-                .Property(p => p.S3AddressText, "164.132.202.63", "Server 3 Address")
-                .Property(p => p.S3PortText, "2302", "Server 3 Port")
-
-                .Property(p => p.TsAddressText, "ts3server://TS.grandtheftarma.com:9987", "TeamSpeak Address")
-                .Property(p => p.TsSelectorText, "#ipsLayout_sidebar > div > ul > li.ipsWidget.ipsWidget_vertical.ipsBox.ipsResponsive_block > div > div:nth-child(4) > a > span.ipsBadge.right", "TeamSpeak Selector")
+                .Property(p => p.TsSelectorUrlText, "https://grandtheftarma.com/", "TeamSpeak Selector URL")
+                .Property(p => p.Servers, "Saved Servers")
 
                 .Property(p => p.ThemeToggleSwitch, false, "Theme")
                 .Property(p => p.SelectedAccentIndex, 1, "Selected Accent")
@@ -117,11 +143,10 @@ namespace GTAMissionDownloader.ViewModels
 
             #region OnStart
             new Join(this, tsViewModel);
-            ServersVerticalAlignment = VerticalAlignment.Center;
 
             if (Accents.Count == 0)
-                foreach (var color in ThemeManager.ColorSchemes)
-                    Accents.Add(new AccentsModel() {ColorName = color.Name});
+                foreach (var color in ThemeManager.Current.ColorSchemes)
+                    Accents.Add(new AccentsModel() {ColorName = color});
 
             if (IsHiddenChecked)
             {
@@ -130,9 +155,9 @@ namespace GTAMissionDownloader.ViewModels
                 WindowVisibility = Visibility.Hidden;
             }
 
-            if (IsTsChecked)
-                if (Process.GetProcessesByName("ts3client_win64").Length == 0)
-                    Join.Server("Ts");
+            //if (IsTsChecked)
+            //    if (Process.GetProcessesByName("ts3client_win64").Length == 0)
+            //        Join.Server("Ts");
 
             if (!IsAutomaticUpdateChecked)
                 _ = Update.FilesCheckAsync(Helper.CtsOnStart.Token);
@@ -210,6 +235,18 @@ namespace GTAMissionDownloader.ViewModels
                 _isLvEnabled = value;
 
                 NotifyOfPropertyChange(() => IsLvEnabled);
+            }
+        }
+
+        private double _missionColumnWidth;
+        public double MissionColumnWidth
+        {
+            get { return _missionColumnWidth; }
+            set
+            {
+                _missionColumnWidth = value;
+
+                NotifyOfPropertyChange(() => MissionColumnWidth);
             }
         }
 
@@ -294,130 +331,6 @@ namespace GTAMissionDownloader.ViewModels
         }
 
         //Servers tab
-        private VerticalAlignment _serversVerticalAlignment;
-        public VerticalAlignment ServersVerticalAlignment
-        {
-            get { return _serversVerticalAlignment; }
-            set
-            {
-                _serversVerticalAlignment = value;
-
-                NotifyOfPropertyChange(() => ServersVerticalAlignment);
-            }
-        }
-
-        public void JoinServer1() => Join.Server("S1");
-
-        private bool _isJoinServer1Enabled;
-        public bool IsJoinServer1Enabled
-        {
-            get { return _isJoinServer1Enabled; }
-            set
-            {
-                _isJoinServer1Enabled = value;
-
-                NotifyOfPropertyChange(() => IsJoinServer1Enabled);
-            }
-        }
-
-        public void JoinServer2() => Join.Server("S2");
-
-        private bool _isJoinServer2Enabled;
-        public bool IsJoinServer2Enabled
-        {
-            get { return _isJoinServer2Enabled; }
-            set
-            {
-                _isJoinServer2Enabled = value;
-
-                NotifyOfPropertyChange(() => IsJoinServer2Enabled);
-            }
-        }
-
-        public void JoinServer3() => Join.Server("S3");
-
-        private bool _isJoinServer3Enabled;
-        public bool IsJoinServer3Enabled
-        {
-            get { return _isJoinServer3Enabled; }
-            set
-            {
-                _isJoinServer3Enabled = value;
-
-                NotifyOfPropertyChange(() => IsJoinServer3Enabled);
-            }
-        }
-
-        public void JoinTs() => Join.Server("Ts");
-
-        private bool _isJoinTsEnabled;
-        public bool IsJoinTsEnabled
-        {
-            get { return _isJoinTsEnabled; }
-            set
-            {
-                _isJoinTsEnabled = value;
-
-                NotifyOfPropertyChange(() => IsJoinTsEnabled);
-            }
-        }
-
-
-        private string _server1Info;
-        public string Server1Info
-        {
-            get { return _server1Info; }
-            set
-            {
-                _server1Info = value;
-
-                NotifyOfPropertyChange(() => Server1Info);
-            }
-        }
-
-        private string _server2Info;
-        public string Server2Info
-        {
-            get { return  _server2Info; }
-            set
-            {
-                _server2Info = value;
-
-                NotifyOfPropertyChange(() => Server2Info);
-            }
-        }
-
-        private string _server3Info;
-        public string Server3Info
-        {
-            get { return _server3Info; }
-            set
-            {
-                _server3Info = value;
-
-                NotifyOfPropertyChange(() => Server3Info);
-            }
-        }
-
-        private string _tsInfo;
-        public string TsInfo
-        {
-            get { return _tsInfo; }
-            set
-            {
-                _tsInfo = value;
-
-                NotifyOfPropertyChange(() => TsInfo);
-            }
-        }
-
-        public void ShowServersSettings()
-        {
-            IsServerFlyOutOpened = true;
-            ServersVerticalAlignment = VerticalAlignment.Top;
-        }
-
-        //Flyout shit
         private bool _isServerFlyOutOpened;
         public bool IsServerFlyOutOpened
         {
@@ -426,94 +339,7 @@ namespace GTAMissionDownloader.ViewModels
             {
                 _isServerFlyOutOpened = value;
 
-                if (!IsServerFlyOutOpened)
-                    ServersVerticalAlignment = VerticalAlignment.Center;
-
                 NotifyOfPropertyChange(() => IsServerFlyOutOpened);
-            }
-        }
-
-        private string _s1AddressText;
-        public string S1AddressText
-        {
-            get { return _s1AddressText; }
-            set
-            {
-                _s1AddressText = value;
-
-                NotifyOfPropertyChange(() => S1AddressText);
-            }
-        }
-
-        private string _s1PortText;
-        public string S1PortText
-        {
-            get { return _s1PortText; }
-            set
-            {
-                _s1PortText = value;
-
-                NotifyOfPropertyChange(() => S1PortText);
-            }
-        }
-
-        private string _s2AddressText;
-        public string S2AddressText
-        {
-            get { return _s2AddressText; }
-            set
-            {
-                _s2AddressText = value;
-
-                NotifyOfPropertyChange(() => S2AddressText);
-            }
-        }
-
-        private string _s2PortText;
-        public string S2PortText
-        {
-            get { return _s2PortText; }
-            set
-            {
-                _s2PortText = value;
-
-                NotifyOfPropertyChange(() => S2PortText);
-            }
-        }
-
-        private string _s3AddressText;
-        public string S3AddressText
-        {
-            get { return _s3AddressText; }
-            set
-            {
-                _s3AddressText = value;
-
-                NotifyOfPropertyChange(() => S3AddressText);
-            }
-        }
-
-        private string _s3PortText;
-        public string S3PortText
-        {
-            get { return _s3PortText; }
-            set
-            {
-                _s3PortText = value;
-
-                NotifyOfPropertyChange(() => S3PortText);
-            }
-        }
-
-        private string _tsAddressText;
-        public string TsAddressText
-        {
-            get { return _tsAddressText; }
-            set
-            {
-                _tsAddressText = value;
-
-                NotifyOfPropertyChange(() => TsAddressText);
             }
         }
 
@@ -529,18 +355,138 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
-        public void FlyOutInfoClick()
+        private string _tsSelectorUrlText;
+        public string TsSelectorUrlText
         {
-            MessageBox.Show(
-@"The First Box:
-Specify TeamSpeak address.
-The Second Box:
-If you want to see the current number on TS, you need to specify the selector.
-This is how you can get it:
-1.Go to main GTA website
-2.Right click on Number/256 and click Inspect
-3.Right click on highlited HTML Elements, copy, copy selector
-4.Paste in the field.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            get { return _tsSelectorUrlText; }
+            set
+            {
+                _tsSelectorUrlText = value;
+
+                NotifyOfPropertyChange(() => TsSelectorUrlText);
+            }
+        }
+
+        public void AddTs()
+        {
+            if (string.IsNullOrWhiteSpace(ServerIpText) || string.IsNullOrWhiteSpace(TsSelectorText) || string.IsNullOrWhiteSpace(TsSelectorUrlText))
+                return;
+
+            var tsItem = Servers.FirstOrDefault(i => i.TsSelectorUrl == TsSelectorUrlText);
+
+            if (tsItem != null)
+            {
+                MessageBox.Show("There can be only one instance of the same TS server!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (Servers.All(item => item.TsSelector != TsSelectorText))
+                Servers.Add(new ServersModel()
+                {
+                    ContentButton = "Join TeamSpeak",
+                    IsJoinButtonEnabled = false,
+                    ServerInfo = "Loading...",
+
+                    ToolTip = $@"Server Address: {ServerIpText},
+TeamSpeak Selector: {TsSelectorText},
+TeamSpeak Selector URL: {TsSelectorUrlText}",
+
+                    ServerIp = ServerIpText,
+                    TsSelector = TsSelectorText,
+                    TsSelectorUrl = TsSelectorUrlText
+                });
+            else
+                MessageBox.Show("The same instance of the TS server is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        public void ShowTeamSpeakSettings() => IsServerFlyOutOpened = true;
+
+        public void ShowServersInfo()
+        {
+            MessageBox.Show(@"This tab allows you to add ArmA 3/TeamSpeak servers and ""watch"" them:
+1.If you want to add ArmA 3 Servers:
+2.If you want to add TeamSpeak:", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+//            MessageBox.Show(
+//                @"The First Box:
+//Specify TeamSpeak address.
+//The Second Box:
+//If you want to see the current number on TS, you need to specify the selector.
+//This is how you can get it:
+//1.Go to main GTA website
+//2.Right click on Number/256 and click Inspect
+//3.Right click on highlited HTML Elements, copy, copy selector
+//4.Paste in the field.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public BindableCollection<ServersModel> Servers { get; set; } = new BindableCollection<ServersModel>();
+
+        public void JoinServer(ServersModel server) => Join.ServerTest(server);
+
+        public void MoveItemUp(ServersModel server)
+        {
+            int currentIndex = Servers.IndexOf(server);
+
+            if (currentIndex <= 0)
+                return;
+
+            Servers.Move(currentIndex, currentIndex - 1);
+        }
+        public void MoveItemDown(ServersModel server)
+        {
+            int currentIndex = Servers.IndexOf(server);
+
+            if (currentIndex < 0 || currentIndex + 1 >= Servers.Count)
+                return;
+
+            Servers.Move(currentIndex, currentIndex + 1);
+        }
+
+        public void DeleteServerItem(ServersModel server) => Servers.Remove(server);
+
+        private string _serverIpText;
+        public string ServerIpText
+        {
+            get { return _serverIpText; }
+            set
+            {
+                _serverIpText = value;
+
+                NotifyOfPropertyChange(() => ServerIpText);
+            }
+        }
+
+        private string _serverQueryPortText;
+        public string ServerQueryPortText
+        {
+            get { return _serverQueryPortText; }
+            set
+            {
+                _serverQueryPortText = value;
+
+                NotifyOfPropertyChange(() => ServerQueryPortText);
+            }
+        }
+
+        public void AddServer()
+        {
+            if (string.IsNullOrWhiteSpace(ServerIpText) || string.IsNullOrWhiteSpace(ServerQueryPortText))
+                return;
+
+            if (Servers.All(item => item.ServerIp != ServerIpText))
+                Servers.Add(new ServersModel()
+                {
+                    ContentButton = "Join Server",
+                    IsJoinButtonEnabled = false,
+                    ServerInfo = "Loading...",
+
+                    ToolTip = $@"Server Address: {ServerIpText},
+Server Port: {ServerQueryPortText}",
+
+                    ServerIp = ServerIpText,
+                    ServerQueryPort = ServerQueryPortText
+                });
+            else
+                MessageBox.Show($"The \"{ServerIpText}\" server address is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private Brush _expanderColor;
@@ -549,7 +495,7 @@ This is how you can get it:
             get { return _expanderColor; }
             set
             {
-                _expanderColor = value; 
+                _expanderColor = value;
 
                 NotifyOfPropertyChange(() => ExpanderColor);
             }
@@ -575,7 +521,7 @@ This is how you can get it:
                     Helper.Manager.ShowWindowAsync(TsViewModel.TsVm, null, settings);
                 }
                 else
-                    _= TsViewModel.TsVm.CloseWindow();
+                    _ = TsViewModel.TsVm.CloseWindow();
 
                 NotifyOfPropertyChange(() => IsExpanderOpened);
             }
@@ -602,7 +548,7 @@ This is how you can get it:
                     true => Brushes.Black
                 };
 
-                ThemeManager.ChangeTheme(Application.Current, theme, ThemeManager.DetectTheme().ColorScheme);
+                ThemeManager.Current.ChangeTheme(Application.Current, theme, ThemeManager.Current.DetectTheme().ColorScheme);
 
                 NotifyOfPropertyChange(() => ThemeToggleSwitch);
             }
@@ -618,8 +564,8 @@ This is how you can get it:
             {
                 _selectedAccent = value;
 
-                var appStyle = ThemeManager.DetectTheme();
-                ThemeManager.ChangeTheme(Application.Current, appStyle.BaseColorScheme, SelectedAccent.ColorName);
+                var appStyle = ThemeManager.Current.DetectTheme();
+                ThemeManager.Current.ChangeTheme(Application.Current, appStyle.BaseColorScheme, SelectedAccent.ColorName);
 
                 NotifyOfPropertyChange(() => SelectedAccent);
             }

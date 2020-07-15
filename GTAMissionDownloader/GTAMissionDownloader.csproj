@@ -16,22 +16,16 @@
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.14.0-alpha-789" />
-    <PackageReference Include="Caliburn.Micro" Version="4.0.117-alpha" />
+    <PackageReference Include="Caliburn.Micro" Version="4.0.138-rc" />
     <PackageReference Include="Google.Apis" Version="1.43.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.43.0" />
     <PackageReference Include="Google.Apis.Core" Version="1.43.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.43.0.1863" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf.NetCore" Version="1.0.10" />
     <PackageReference Include="Jot" Version="2.1.4" />
-    <PackageReference Include="MahApps.Metro" Version="2.0.0-alpha0660" />
-    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="3.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="QueryMaster">
-      <HintPath>..\..\QueryMaster.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
+    <PackageReference Include="MahApps.Metro" Version="2.0.0" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.2.0" />
+    <PackageReference Include="QueryMaster" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
