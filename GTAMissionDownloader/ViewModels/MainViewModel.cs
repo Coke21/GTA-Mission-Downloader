@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Caliburn.Micro;
 using ControlzEx.Theming;
@@ -98,6 +100,7 @@ namespace GTAMissionDownloader.ViewModels
         public void WindowSizeChanged()
         {
             MissionColumnWidth = Width / 2.5;
+            IgnoreListColumnWidth = Width / 3;
             WindowLocationChanged();
         } 
 
@@ -107,6 +110,7 @@ namespace GTAMissionDownloader.ViewModels
             ShowInTaskbar = true;
             IsUpdateVisible = Visibility.Hidden;
             IsStopDownloadVisible = Visibility.Hidden;
+            IsAutomaticUpdateEnabled = true;
 
             new Download(this);
             new Notification(this);
@@ -119,12 +123,15 @@ namespace GTAMissionDownloader.ViewModels
             Persistence.Tracker.Configure<MainViewModel>()
                 .Id(p => p.WindowName, includeType: false)
                 .Property(p => p.Height, 430, "Window Height")
-                .Property(p => p.Width, 740, "Window Width")
+                .Property(p => p.Width, 850, "Window Width")
 
-                .Property(p => p.MissionItems, "Saved Mission file(s)")
-                .Property(p => p.MissionColumnWidth, 300, "Column Width")
+                .Property(p => p.MissionItems, "Saved Mission File(s)")
+                .Property(p => p.MissionColumnWidth, 300, "Mission Column Width")
 
-                .Property(p => p.Accents, "Accent items")
+                .Property(p => p.IgnoredItems, "Ignored Item(s)")
+                .Property(p => p.IgnoreListColumnWidth, 300, "Ignore Column Width")
+
+                .Property(p => p.Accents, "Accent Items")
 
                 .Property(p => p.TsSelectorUrlText, "https://grandtheftarma.com/", "TeamSpeak Selector URL")
                 .Property(p => p.Servers, "Saved Servers")
@@ -132,10 +139,10 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.ThemeToggleSwitch, false, "Theme")
                 .Property(p => p.SelectedAccentIndex, 1, "Selected Accent")
 
-                .Property(p => p.IsStartUpChecked, false, "StartUp checkbox")
-                .Property(p => p.IsHiddenChecked, false, "Hide at startup checkbox")
-                .Property(p => p.IsTsChecked, false, "Run TS automatically checkbox")
-                .Property(p => p.IsAutomaticUpdateChecked, false, "Automatic update checkbox")
+                .Property(p => p.IsStartUpChecked, false, "StartUp Checkbox")
+                .Property(p => p.IsHiddenChecked, false, "Hide at Startup Checkbox")
+                .Property(p => p.IsTsChecked, false, "Run TS Automatically Checkbox")
+                .Property(p => p.IsAutomaticUpdateChecked, false, "Automatic Update Checkbox")
 
                 .PersistOn(nameof(PropertyChanged));
 
@@ -223,8 +230,8 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
-        //ListView
-        public BindableCollection<ListViewModel> MissionItems { get; set; } = new BindableCollection<ListViewModel>();
+        //Mfs ListView
+        public BindableCollection<MissionModel> MissionItems { get; set; } = new BindableCollection<MissionModel>();
 
         private bool _isLvEnabled;
         public bool IsLvEnabled
@@ -257,6 +264,18 @@ namespace GTAMissionDownloader.ViewModels
                 foreach (var item in MissionItems)
                     item.IsSelected = false;
         }
+        public void LvMouseMoveDragDrop(MainView view)
+        {
+            if (Mouse.LeftButton != MouseButtonState.Pressed)
+                return;
+
+            List<MissionModel> myList = new List<MissionModel>();
+            foreach (var missionItem in MissionItems)
+                if (missionItem.IsSelected)
+                    myList.Add(missionItem);
+
+            DragDrop.DoDragDrop(view, new DataObject(myList), DragDropEffects.Copy);
+        }
 
         public async Task DownloadMission()
         {
@@ -272,9 +291,13 @@ namespace GTAMissionDownloader.ViewModels
                 return;
             }
 
+            IsAutomaticUpdateEnabled = false;
+
             foreach (var item in MissionItems)
                 if (item.IsSelected)
                     await Download.FileAsync(item.FileId, item, Helper.CtsStopDownloading.Token);
+
+            IsAutomaticUpdateEnabled = true;
         }
 
         public void DeleteMission()
@@ -298,7 +321,58 @@ namespace GTAMissionDownloader.ViewModels
                                                               "2.Tick them.\n" +
                                                               "3.Go to Options tab and tick the Automatic Update checkbox.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 
-        //Below ListView
+        //Ignore Listview
+        //add to checking in Update class
+        public BindableCollection<IgnoredModel> IgnoredItems { get; set; } = new BindableCollection<IgnoredModel>();
+
+        private double _ignoreListColumnWidth;
+        public double IgnoreListColumnWidth
+        {
+            get { return _ignoreListColumnWidth; }
+            set
+            {
+                _ignoreListColumnWidth = value;
+
+                NotifyOfPropertyChange(() => IgnoreListColumnWidth);
+            }
+        }
+
+        public void IgnoreLvMouseDown(MainView sender, Point e)
+        {
+            HitTestResult r = VisualTreeHelper.HitTest(sender, e);
+            if (r.VisualHit.GetType() != typeof(ListViewItem))
+                foreach (var item in IgnoredItems)
+                    item.IsSelected = false;
+        }
+
+        public void ItemDropLv(DragEventArgs dragArgs)
+        {
+            if (!dragArgs.Data.GetDataPresent(typeof(List<MissionModel>)))
+                return;
+
+            var droppedItems = dragArgs.Data.GetData(typeof(List<MissionModel>)) as List<MissionModel>;
+
+            foreach (var droppedItem in droppedItems)
+            {
+                if (IgnoredItems.Any(item => item.FileId == droppedItem.FileId))
+                    continue;
+
+                IgnoredItems.Add(new IgnoredModel()
+                {
+                    Item = droppedItem.Mission,
+                    FileId = droppedItem.FileId
+                });
+            }
+        }
+
+        public void DeleteIgnoredItem()
+        {
+            foreach (var item in IgnoredItems.ToList())
+                if (item.IsSelected)
+                    IgnoredItems.Remove(item);
+        }
+
+        //Below ListViews
         private string _downloadInfoText;
         public string DownloadInfoText
         {
@@ -400,6 +474,53 @@ TeamSpeak Selector URL: {TsSelectorUrlText}",
         }
 
         public void ShowTeamSpeakSettings() => IsServerFlyOutOpened = true;
+
+        public void AddGtaServers()
+        {
+            if (Servers.Any(server => server.ServerIp == "164.132.200.53" || server.ServerIp == "164.132.202.63" || server.ServerIp == "TS.grandtheftarma.com:9987"))
+                return;
+
+            Servers.Add(new ServersModel()
+            {
+                ContentButton = "Join Server",
+                IsJoinButtonEnabled = false,
+                ServerInfo = "Loading...",
+
+                ToolTip = @"Server Address: 164.132.200.53,
+Server Port: 2302",
+
+                ServerIp = "164.132.200.53",
+                ServerQueryPort = "2302"
+            }); 
+            
+            Servers.Add(new ServersModel()
+            {
+                ContentButton = "Join Server",
+                IsJoinButtonEnabled = false,
+                ServerInfo = "Loading...",
+
+                ToolTip = @"Server Address: 164.132.202.63,
+Server Port: 2302",
+
+                ServerIp = "164.132.202.63",
+                ServerQueryPort = "2302"
+            });
+
+            Servers.Add(new ServersModel()
+            {
+                ContentButton = "Join TeamSpeak",
+                IsJoinButtonEnabled = false,
+                ServerInfo = "Loading...",
+
+                ToolTip = @"Server Address: TS.grandtheftarma.com:9987,
+TeamSpeak Selector: #ipsLayout_sidebar > div > ul > li:nth-child(2) > div > div:nth-child(3) > span,
+TeamSpeak Selector URL: http://grandtheftarma.com/",
+
+                ServerIp = "TS.grandtheftarma.com:9987",
+                TsSelector = "#ipsLayout_sidebar > div > ul > li:nth-child(2) > div > div:nth-child(3) > span",
+                TsSelectorUrl = "http://grandtheftarma.com/"
+            });
+        }
 
         public void ShowServersInfo()
         {
@@ -657,18 +778,27 @@ Server Port: {ServerQueryPortText}",
                 _isAutomaticUpdateChecked = value;
 
                 if (IsAutomaticUpdateChecked)
+                    _ = Update.UpdateLvItemsCheckAsync(Helper.CtsStopDownloading.Token);
+                else
                 {
-                    try
-                    {
-                        _ = Update.UpdateLvItemsCheckAsync(Helper.CtsStopDownloading.Token);
-                    }
-                    catch (IOException)
-                    {
-                        IsAutomaticUpdateChecked = false;
-                    }
+                    Helper.CtsStopDownloading.Cancel();
+                    Helper.CtsStopDownloading.Dispose();
+                    Helper.CtsStopDownloading = new CancellationTokenSource();
                 }
 
                 NotifyOfPropertyChange(() => IsAutomaticUpdateChecked);
+            }
+        }
+
+        private bool _isAutomaticUpdateEnabled;
+        public bool IsAutomaticUpdateEnabled
+        {
+            get { return _isAutomaticUpdateEnabled; }
+            set
+            {
+                _isAutomaticUpdateEnabled = value; 
+
+                NotifyOfPropertyChange(() => IsAutomaticUpdateEnabled);
             }
         }
 

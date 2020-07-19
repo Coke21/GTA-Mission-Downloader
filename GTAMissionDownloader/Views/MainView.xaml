@@ -10,6 +10,7 @@
         Title="{Binding AppTitle, Mode=OneTime}" TitleCharacterCasing="Normal"
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         MinHeight="430" MinWidth="300" WindowStartupLocation="CenterScreen"
+        d:DesignHeight="430" d:DesignWidth="850"
         WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
         Icon="{Binding IconPath}" 
         cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged];
@@ -32,14 +33,14 @@
                             <Label Content="TeamSpeak Selector:" FontWeight="Bold"/>
 
                             <TextBox Text="{Binding TsSelectorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                     mah:TextBoxHelper.Watermark="TeamSpeak Selector..." Width="440" ToolTip="Insert TeamSpeak Selector"/>
+                                     mah:TextBoxHelper.Watermark="TeamSpeak Selector..." Width="410" ToolTip="Insert TeamSpeak Selector"/>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
                             <Label Content="TeamSpeak Selector URL:" FontWeight="Bold"/>
 
                             <TextBox Text="{Binding TsSelectorUrlText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" mah:TextBoxHelper.ClearTextButton="True"
-                                     mah:TextBoxHelper.Watermark="TeamSpeak Selector URL..." Width="415" ToolTip="Insert TeamSpeak Selector URL"/>
+                                     mah:TextBoxHelper.Watermark="TeamSpeak Selector URL..." Width="385" ToolTip="Insert TeamSpeak Selector URL"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -78,6 +79,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1" />
+                    <ColumnDefinition Width="1.9*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
                 </Grid.ColumnDefinitions>
@@ -90,7 +92,7 @@
                     <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center">
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center">
                     <TextBlock Text="GTA Mission Downloader" TextAlignment="Center" FontSize="20"
                                FontWeight="Bold" />
 
@@ -110,7 +112,7 @@
                     </TextBlock>
                 </StackPanel>
 
-                <Button Grid.Column="1" Grid.Row="1" x:Name="ReadChangelog"
+                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" x:Name="ReadChangelog"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
                         ToolTip="Read the changelog" Margin="315 0 0 0">
                     <StackPanel Orientation="Horizontal">
@@ -120,7 +122,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Grid.Column="1" Grid.Row="1" x:Name="UpdateProgramAsync"
+                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" x:Name="UpdateProgramAsync"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
                         Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="453 0 0 0">
                     <StackPanel Orientation="Horizontal">
@@ -131,7 +133,9 @@
                 </Button>
 
                 <ListView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding MissionItems}"
-                          IsEnabled="{Binding IsLvEnabled}" cal:Message.Attach="[Event MouseDown] = [Action LvMouseDown($view, $mousepoint)]"
+                          IsEnabled="{Binding IsLvEnabled}" AllowDrop="False" 
+                          cal:Message.Attach="[Event MouseDown] = [Action LvMouseDown($view, $mousepoint)];
+                                              [Event PreviewMouseMove] = [Action LvMouseMoveDragDrop($view)];"
                           BorderThickness="1.000001" Margin="0 1 0 0">
 
                     <ListView.ItemContainerStyle>
@@ -195,7 +199,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn>
+                            <GridViewColumn Width="110">
                                 <GridViewColumnHeader Content="Last Modified:" ToolTip="Shows the modified time from GTA's Google Drive"/>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -249,8 +253,55 @@
                     </ListView.View>
                 </ListView>
 
-                <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 4 0 0">
+                <ListView Grid.Column="2" Grid.Row="2" ItemsSource="{Binding IgnoredItems}" 
+                          cal:Message.Attach="[Event MouseDown] = [Action IgnoreLvMouseDown($view, $mousepoint)];
+                                              [Event PreviewDrop] = [Action ItemDropLv($eventArgs)];"
+                          AllowDrop="True" BorderThickness="1.000001" Margin="2 1 0 0">
+
+                    <ListView.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource MahApps.Styles.ListViewItem}" TargetType="{x:Type ListViewItem}">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+
+                            <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=ListView}}" />
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Delete" cal:Message.Attach="DeleteIgnoredItem" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
+                                            <MenuItem.Icon>
+                                                <iconPacks:PackIconMaterial Kind="TrashCanOutline" HorizontalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.View>
+                        <GridView>
+                            <GridView.ColumnHeaderContainerStyle>
+                                <Style BasedOn="{StaticResource MahApps.Styles.GridViewColumnHeader}" TargetType="{x:Type GridViewColumnHeader}">
+                                    <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                </Style>
+                            </GridView.ColumnHeaderContainerStyle>
+
+                            <GridViewColumn Header="Ignored Items:" Width="{Binding IgnoreListColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Item}" Foreground="Red"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Orientation="Horizontal"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 2 0 0">
                     <TextBlock Text="{Binding DownloadInfoText}" FontSize="14" FontWeight="Bold"
                                TextAlignment="Center" VerticalAlignment="Center"/>
 
@@ -285,6 +336,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
@@ -298,7 +350,12 @@
                                         <iconPacks:PackIconMaterial Kind="HeadphonesSettings"/>
                                     </Button>
 
-                                    <Button Grid.Column="2" cal:Message.Attach="[Event Click] = [Action ShowServersInfo()]" Style="{DynamicResource MahApps.Styles.Button.Circle}"
+                                    <Button Grid.Column="2" cal:Message.Attach="[Event Click] = [Action AddGtaServers()]" Style="{DynamicResource MahApps.Styles.Button.Circle}"
+                                            ToolTip="Add GTA Servers (might be outdated)">
+                                        <iconPacks:PackIconMaterial Kind="ServerPlus"/>
+                                    </Button>
+
+                                    <Button Grid.Column="3" cal:Message.Attach="[Event Click] = [Action ShowServersInfo()]" Style="{DynamicResource MahApps.Styles.Button.Circle}"
                                             ToolTip="Show Servers information" Margin="2 0 0 0">
                                         <iconPacks:PackIconMaterial Kind="Information"/>
                                     </Button>
@@ -467,8 +524,8 @@
                                                   ToolTip="Run TeamSpeak automatically upon the program start"/>
                                     </StackPanel>
 
-                                    <CheckBox Content="Automatic Update" IsChecked="{Binding IsAutomaticUpdateChecked}" Margin="0 2 0 0"
-                                              ToolTip="Automatically updates the ticked mission files"/>
+                                    <CheckBox Content="Automatic Update" IsChecked="{Binding IsAutomaticUpdateChecked}" IsEnabled="{Binding IsAutomaticUpdateEnabled}"
+                                              Margin="0 2 0 0" ToolTip="Automatically updates the ticked mission files"/>
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 0">
                                         <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">

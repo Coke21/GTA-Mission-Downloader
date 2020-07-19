@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace GTAMissionDownloader.Models
 {
-    public class ListViewModel : INotifyPropertyChanged
+    public class MissionModel : INotifyPropertyChanged
     {
         private string _mission;
         public string Mission

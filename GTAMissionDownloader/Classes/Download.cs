@@ -18,7 +18,7 @@ namespace GTAMissionDownloader.Classes
             _mvm = mvm;
         }
 
-        public static async Task FileAsync(string fileId, ListViewModel selectedItem, CancellationToken cancellationToken, string option = "missionFile")
+        public static async Task FileAsync(string fileId, MissionModel selectedItem, CancellationToken cancellationToken, string option = "missionFile")
         {
             _mvm.IsStopDownloadVisible = Visibility.Visible;
 

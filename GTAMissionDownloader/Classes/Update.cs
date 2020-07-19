@@ -47,7 +47,7 @@ namespace GTAMissionDownloader.Classes
                             continue;
 
                         int itemPosition = files.Files.IndexOf(item);
-                        _mvm.MissionItems.Insert(itemPosition, new ListViewModel()
+                        _mvm.MissionItems.Insert(itemPosition, new MissionModel()
                         {
                             Mission = item.Name,
                             IsMissionUpdated = "Missing",
@@ -84,7 +84,7 @@ namespace GTAMissionDownloader.Classes
                 foreach (var file in files.Files)
                 {
                     string status = await LvItemsCheckAsync(file.Name, file.Id);
-                    _mvm.MissionItems.Add(new ListViewModel()
+                    _mvm.MissionItems.Add(new MissionModel()
                     {
                         Mission = file.Name,
                         IsMissionUpdated = status,
@@ -147,8 +147,6 @@ namespace GTAMissionDownloader.Classes
         }
         public static async Task UpdateLvItemsCheckAsync(CancellationToken cancellationToken)
         {
-            await FilesCheckAsync(Helper.CtsOnStart.Token);
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked).ToList();
@@ -157,6 +155,8 @@ namespace GTAMissionDownloader.Classes
                     await Task.Delay(5_000);
                     continue;
                 }
+
+                await FilesCheckAsync(Helper.CtsOnStart.Token);
 
                 foreach (var item in checkedItems)
                 {
@@ -168,7 +168,7 @@ namespace GTAMissionDownloader.Classes
                     await Download.FileAsync(item.FileId, item, Helper.CtsStopDownloading.Token);
                 }
 
-                //5 min
+                //5 min - 300_000
                 await Task.Delay(300_000);
             }
         }
