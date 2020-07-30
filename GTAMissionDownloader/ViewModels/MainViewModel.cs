@@ -121,6 +121,7 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.Width, 850, "Window Width")
 
                 .Property(p => p.MissionItems, "Saved Mission File(s)")
+                .Property(p => p.MfColumnWidth, new GridLength(280, GridUnitType.Pixel), "GridSplitter Column Width")
                 .Property(p => p.IgnoredItems, "Ignored Item(s)")
 
                 .Property(p => p.Accents, "Accent Items")
@@ -325,6 +326,19 @@ namespace GTAMissionDownloader.ViewModels
                                                               "1.Choose the mission files that you want to observe.\n" +
                                                               "2.Tick them.\n" +
                                                               "3.Go to Options tab and tick the Automatic Update checkbox.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+
+        //GridSplitter
+        private GridLength _mfColumnWidth;
+        public GridLength MfColumnWidth
+        {
+            get { return _mfColumnWidth; }
+            set
+            {
+                _mfColumnWidth = value;
+
+                NotifyOfPropertyChange(() => MfColumnWidth);
+            }
+        }
 
         //Ignore Listview
         public BindableCollection<IgnoredModel> IgnoredItems { get; set; } = new BindableCollection<IgnoredModel>();
