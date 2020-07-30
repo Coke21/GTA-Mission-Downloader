@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="{Binding AppTitle, Mode=OneTime}" TitleCharacterCasing="Normal"
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-        MinHeight="430" MinWidth="300" WindowStartupLocation="CenterScreen"
+        MinHeight="430" MinWidth="800" WindowStartupLocation="CenterScreen"
         d:DesignHeight="430" d:DesignWidth="850"
         WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
         Icon="{Binding IconPath}" 
@@ -80,6 +80,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1" />
                     <ColumnDefinition Width="1.9*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
                 </Grid.ColumnDefinitions>
@@ -92,7 +93,7 @@
                     <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center">
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" HorizontalAlignment="Center">
                     <TextBlock Text="GTA Mission Downloader" TextAlignment="Center" FontSize="20"
                                FontWeight="Bold" />
 
@@ -112,7 +113,7 @@
                     </TextBlock>
                 </StackPanel>
 
-                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" x:Name="ReadChangelog"
+                <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" x:Name="ReadChangelog"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
                         ToolTip="Read the changelog" Margin="315 0 0 0">
                     <StackPanel Orientation="Horizontal">
@@ -122,7 +123,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" x:Name="UpdateProgramAsync"
+                <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" x:Name="UpdateProgramAsync"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
                         Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="453 0 0 0">
                     <StackPanel Orientation="Horizontal">
@@ -135,7 +136,8 @@
                 <ListView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding MissionItems}"
                           IsEnabled="{Binding IsLvEnabled}" AllowDrop="False" 
                           cal:Message.Attach="[Event MouseDown] = [Action LvMouseDown($view, $mousepoint)];
-                                              [Event PreviewMouseMove] = [Action LvMouseMoveDragDrop($view)];"
+                                              [Event MouseMove] = [Action LvMouseMoveDragDrop($view)];
+                                              [Event SizeChanged] = [Action LvMfSizeChanged($source)];"
                           BorderThickness="1.000001" Margin="0 1 0 0">
 
                     <ListView.ItemContainerStyle>
@@ -175,7 +177,7 @@
                                 </Style>
                             </GridView.ColumnHeaderContainerStyle>
 
-                            <GridViewColumn Header="Mission File:" Width="{Binding MissionColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <GridViewColumn Header="Mission File:">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Mission}">
@@ -228,7 +230,7 @@
                                 <GridViewColumnHeader Content="Subscribe?" ToolTip="Add the selected Mission file(s) to the queue"/>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsChecked}"/>
+                                        <CheckBox IsChecked="{Binding IsChecked}" cal:Message.Attach="[Event Unchecked] = [Action SubscribeUnChecked];"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -253,9 +255,12 @@
                     </ListView.View>
                 </ListView>
 
-                <ListView Grid.Column="2" Grid.Row="2" ItemsSource="{Binding IgnoredItems}" 
+                <GridSplitter Grid.Column="2" Grid.Row="2" Width="5" Margin="2 0 0 0"/>
+
+                <ListView Grid.Column="3" Grid.Row="2" ItemsSource="{Binding IgnoredItems}" 
                           cal:Message.Attach="[Event MouseDown] = [Action IgnoreLvMouseDown($view, $mousepoint)];
-                                              [Event PreviewDrop] = [Action ItemDropLv($eventArgs)];"
+                                              [Event PreviewDrop] = [Action ItemDropLv($eventArgs)];
+                                              [Event SizeChanged] = [Action LvIgnoredSizeChanged($source)];"
                           AllowDrop="True" BorderThickness="1.000001" Margin="2 1 0 0">
 
                     <ListView.ItemContainerStyle>
@@ -289,7 +294,7 @@
                                 </Style>
                             </GridView.ColumnHeaderContainerStyle>
 
-                            <GridViewColumn Header="Ignored Items:" Width="{Binding IgnoreListColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <GridViewColumn Header="Ignored Items:">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Item}" Foreground="Red"/>
@@ -300,7 +305,7 @@
                     </ListView.View>
                 </ListView>
 
-                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Orientation="Horizontal"
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="3" Orientation="Horizontal"
                             HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 2 0 0">
                     <TextBlock Text="{Binding DownloadInfoText}" FontSize="14" FontWeight="Bold"
                                TextAlignment="Center" VerticalAlignment="Center"/>

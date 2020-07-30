@@ -28,17 +28,11 @@ namespace GTAMissionDownloader.Classes
             listRequest.Q = $"'{Properties.FolderId}' in parents";
             var files = await listRequest.ExecuteAsync();
 
-            files.Files.Remove(files.Files.SingleOrDefault(r => r.Name == "readme.txt"));
+            foreach (var item in _mvm.IgnoredItems)
+                files.Files.Remove(files.Files.SingleOrDefault(r => r.Id == item.FileId));
 
             if (_mvm.MissionItems.Count > 0)
             {
-                foreach (var item in _mvm.MissionItems)
-                {
-                    string status = await LvItemsCheckAsync(item.Mission, item.FileId);
-                    item.IsMissionUpdated = status;
-                    item.IsModifiedTimeUpdated = status;
-                }
-
                 //Mission file added to the Google drive
                 if (_mvm.MissionItems.Count < files.Files.Count)
                     foreach (var item in files.Files.ToList())
@@ -79,6 +73,13 @@ namespace GTAMissionDownloader.Classes
                         item1.FileId = item2.Id;
                         item1.IsChecked = item1.IsChecked;
                     }
+
+                foreach (var item in _mvm.MissionItems)
+                {
+                    string status = await LvItemsCheckAsync(item.Mission, item.FileId);
+                    item.IsMissionUpdated = status;
+                    item.IsModifiedTimeUpdated = status;
+                }
             }
             else
                 foreach (var file in files.Files)
@@ -149,15 +150,9 @@ namespace GTAMissionDownloader.Classes
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked).ToList();
-                if (!checkedItems.Any())
-                {
-                    await Task.Delay(5_000);
-                    continue;
-                }
-
                 await FilesCheckAsync(Helper.CtsOnStart.Token);
 
+                var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked).ToList();
                 foreach (var item in checkedItems)
                 {
                     string status = await LvItemsCheckAsync(item.Mission, item.FileId);

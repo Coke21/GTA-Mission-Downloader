@@ -97,12 +97,7 @@ namespace GTAMissionDownloader.ViewModels
             TsViewModel.TsVm.Left = win.Left + win.ActualWidth + 1;
         }
 
-        public void WindowSizeChanged()
-        {
-            MissionColumnWidth = Width / 2.5;
-            IgnoreListColumnWidth = Width / 3;
-            WindowLocationChanged();
-        } 
+        public void WindowSizeChanged() => WindowLocationChanged();
 
         public MainViewModel()
         {
@@ -126,10 +121,7 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.Width, 850, "Window Width")
 
                 .Property(p => p.MissionItems, "Saved Mission File(s)")
-                .Property(p => p.MissionColumnWidth, 300, "Mission Column Width")
-
                 .Property(p => p.IgnoredItems, "Ignored Item(s)")
-                .Property(p => p.IgnoreListColumnWidth, 300, "Ignore Column Width")
 
                 .Property(p => p.Accents, "Accent Items")
 
@@ -213,10 +205,7 @@ namespace GTAMissionDownloader.ViewModels
             });
         }
 
-        public async Task UpdateProgramAsync()
-        {
-            await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, "programUpdate");
-        }
+        public async Task UpdateProgramAsync() => await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, "programUpdate");
 
         private Visibility _isUpdateVisible;
         public Visibility IsUpdateVisible
@@ -245,18 +234,6 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
-        private double _missionColumnWidth;
-        public double MissionColumnWidth
-        {
-            get { return _missionColumnWidth; }
-            set
-            {
-                _missionColumnWidth = value;
-
-                NotifyOfPropertyChange(() => MissionColumnWidth);
-            }
-        }
-
         public void LvMouseDown(MainView sender, Point e)
         {
             HitTestResult r = VisualTreeHelper.HitTest(sender, e);
@@ -274,7 +251,28 @@ namespace GTAMissionDownloader.ViewModels
                 if (missionItem.IsSelected)
                     myList.Add(missionItem);
 
+            if (myList.Count == 0)
+                return;
+
             DragDrop.DoDragDrop(view, new DataObject(myList), DragDropEffects.Copy);
+        }
+        public void LvMfSizeChanged(ListView listView)
+        {
+            GridView gridView = listView.View as GridView;
+
+            var workingWidth = listView.ActualWidth - 5;
+            var col1 = 0.50;
+            var col2 = 0.25;
+            var col3 = 0.20;
+            var col4 = 0.05;
+
+            if (workingWidth < 0)
+                return;
+
+            gridView.Columns[0].Width = workingWidth * col1;
+            gridView.Columns[1].Width = workingWidth * col2;
+            gridView.Columns[2].Width = workingWidth * col3;
+            gridView.Columns[3].Width = workingWidth * col4;
         }
 
         public async Task DownloadMission()
@@ -311,6 +309,13 @@ namespace GTAMissionDownloader.ViewModels
                 }
         }
 
+        public void SubscribeUnChecked()
+        {
+            var checkedItems = MissionItems.Where(ps => ps.IsChecked).ToList();
+            if (!checkedItems.Any())
+                IsAutomaticUpdateChecked = false;
+        }
+
         public void InfoClick() => MessageBox.Show("These are the current colors and the meaning behind them in the list:\n" +
                                                               "Green - You have the updated version of the mission file.\n" +
                                                               "Red - You have the outdated version of the mission file.\n" +
@@ -322,20 +327,7 @@ namespace GTAMissionDownloader.ViewModels
                                                               "3.Go to Options tab and tick the Automatic Update checkbox.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 
         //Ignore Listview
-        //add to checking in Update class
         public BindableCollection<IgnoredModel> IgnoredItems { get; set; } = new BindableCollection<IgnoredModel>();
-
-        private double _ignoreListColumnWidth;
-        public double IgnoreListColumnWidth
-        {
-            get { return _ignoreListColumnWidth; }
-            set
-            {
-                _ignoreListColumnWidth = value;
-
-                NotifyOfPropertyChange(() => IgnoreListColumnWidth);
-            }
-        }
 
         public void IgnoreLvMouseDown(MainView sender, Point e)
         {
@@ -362,14 +354,30 @@ namespace GTAMissionDownloader.ViewModels
                     Item = droppedItem.Mission,
                     FileId = droppedItem.FileId
                 });
+
+                MissionItems.Remove(droppedItem);
             }
         }
+        public void LvIgnoredSizeChanged(ListView listView)
+        {
+            GridView gridView = listView.View as GridView;
 
-        public void DeleteIgnoredItem()
+            var workingWidth = listView.ActualWidth - 5;
+            var col1 = 1;
+
+            if (workingWidth < 0)
+                return;
+
+            gridView.Columns[0].Width = workingWidth * col1;
+        }
+
+        public async Task DeleteIgnoredItem()
         {
             foreach (var item in IgnoredItems.ToList())
                 if (item.IsSelected)
                     IgnoredItems.Remove(item);
+
+            await Update.FilesCheckAsync(Helper.CtsOnStart.Token);
         }
 
         //Below ListViews
@@ -778,7 +786,16 @@ Server Port: {ServerQueryPortText}",
                 _isAutomaticUpdateChecked = value;
 
                 if (IsAutomaticUpdateChecked)
+                {
+                    var checkedItems = MissionItems.Where(ps => ps.IsChecked).ToList();
+                    if (!checkedItems.Any())
+                    {
+                        IsAutomaticUpdateChecked = false;
+                        return;
+                    }
+
                     _ = Update.UpdateLvItemsCheckAsync(Helper.CtsStopDownloading.Token);
+                }
                 else
                 {
                     Helper.CtsStopDownloading.Cancel();
