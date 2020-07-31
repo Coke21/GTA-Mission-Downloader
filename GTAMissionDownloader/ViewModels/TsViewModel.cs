@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,7 +26,7 @@ namespace GTAMissionDownloader.ViewModels
             Persistence.Tracker.Configure<TsViewModel>()
                 .Id(p => p.WindowName, includeType: false)
                 .Properties(p => new { p.Top, p.Left })
-                .Property(p => p.Height, 350, "Window Height")
+                .Property(p => p.Height, 430, "Window Height")
                 .Property(p => p.Width, 310, "Window Width")
                 .Property(p => p.ColumnWidth, 290, "Column Width")
 

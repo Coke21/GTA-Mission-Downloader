@@ -28,7 +28,7 @@ namespace GTAMissionDownloader.Classes
         //private static string[] ServerIps { get; } = { "164.132.200.53:2302", "164.132.202.63:2602", "164.132.202.63:2302", "ts3server://TS.grandtheftarma.com:9987" };
         //#ipsLayout_sidebar > div > ul > li.ipsWidget.ipsWidget_vertical.ipsBox.ipsResponsive_block > div > div:nth-child(4) > a > span.ipsBadge.right
 
-        public static void ServerTest(ServersModel serverModel)
+        public static void Server(ServersModel serverModel)
         {
             try
             {

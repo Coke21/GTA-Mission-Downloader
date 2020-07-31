@@ -99,6 +99,7 @@ namespace GTAMissionDownloader.ViewModels
 
         public void WindowSizeChanged() => WindowLocationChanged();
 
+        private TsViewModel _tsViewModel;
         public MainViewModel()
         {
             WindowState = WindowState.Normal;
@@ -110,7 +111,7 @@ namespace GTAMissionDownloader.ViewModels
             new Download(this);
             new Notification(this);
             new Update(this);
-            var tsViewModel = new TsViewModel(this);
+            _tsViewModel = new TsViewModel(this);
 
             Directory.CreateDirectory(Properties.GetArma3FolderPath);
             Directory.CreateDirectory(Properties.GetArma3MissionFolderPath);
@@ -142,7 +143,7 @@ namespace GTAMissionDownloader.ViewModels
             Persistence.Tracker.Track(this);
 
             #region OnStart
-            new Join(this, tsViewModel);
+            new Join(this, _tsViewModel);
 
             if (Accents.Count == 0)
                 foreach (var color in ThemeManager.Current.ColorSchemes)
@@ -263,8 +264,8 @@ namespace GTAMissionDownloader.ViewModels
 
             var workingWidth = listView.ActualWidth - 5;
             var col1 = 0.50;
-            var col2 = 0.25;
-            var col3 = 0.20;
+            var col2 = 0.30;
+            var col3 = 0.15;
             var col4 = 0.05;
 
             if (workingWidth < 0)
@@ -481,9 +482,11 @@ namespace GTAMissionDownloader.ViewModels
                 {
                     ContentButton = "Join TeamSpeak",
                     IsJoinButtonEnabled = false,
-                    ServerInfo = "Loading...",
+                    JoinServerToolTip = $@"Join: {_tsViewModel.TsChannelNameText}
+Password: {_tsViewModel.TsChannelPasswordText}",
 
-                    ToolTip = $@"Server Address: {ServerIpText},
+                    ServerInfo = "Loading...",
+                    ServerInfoToolTip = $@"Server Address: {ServerIpText},
 TeamSpeak Selector: {TsSelectorText},
 TeamSpeak Selector URL: {TsSelectorUrlText}",
 
@@ -493,6 +496,44 @@ TeamSpeak Selector URL: {TsSelectorUrlText}",
                 });
             else
                 MessageBox.Show("The same instance of the TS server is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private bool _isExpanderOpened;
+        public bool IsExpanderOpened
+        {
+            get { return _isExpanderOpened; }
+            set
+            {
+                _isExpanderOpened = value;
+
+                if (IsExpanderOpened)
+                {
+                    var win = Application.Current.MainWindow;
+
+                    TsViewModel.TsVm.Top = win.Top;
+                    TsViewModel.TsVm.Left = win.Left + win.ActualWidth + 1;
+
+                    dynamic settings = new ExpandoObject();
+                    settings.Owner = win;
+
+                    Helper.Manager.ShowWindowAsync(TsViewModel.TsVm, null, settings);
+                }
+                else
+                    _ = TsViewModel.TsVm.CloseWindow();
+
+                NotifyOfPropertyChange(() => IsExpanderOpened);
+            }
+        }
+        private Brush _expanderColor;
+        public Brush ExpanderColor
+        {
+            get { return _expanderColor; }
+            set
+            {
+                _expanderColor = value;
+
+                NotifyOfPropertyChange(() => ExpanderColor);
+            }
         }
 
         public void ShowTeamSpeakSettings() => IsServerFlyOutOpened = true;
@@ -506,9 +547,9 @@ TeamSpeak Selector URL: {TsSelectorUrlText}",
             {
                 ContentButton = "Join Server",
                 IsJoinButtonEnabled = false,
-                ServerInfo = "Loading...",
 
-                ToolTip = @"Server Address: 164.132.200.53,
+                ServerInfo = "Loading...",
+                ServerInfoToolTip = @"Server Address: 164.132.200.53,
 Server Port: 2302",
 
                 ServerIp = "164.132.200.53",
@@ -519,9 +560,9 @@ Server Port: 2302",
             {
                 ContentButton = "Join Server",
                 IsJoinButtonEnabled = false,
-                ServerInfo = "Loading...",
 
-                ToolTip = @"Server Address: 164.132.202.63,
+                ServerInfo = "Loading...",
+                ServerInfoToolTip = @"Server Address: 164.132.202.63,
 Server Port: 2302",
 
                 ServerIp = "164.132.202.63",
@@ -532,9 +573,11 @@ Server Port: 2302",
             {
                 ContentButton = "Join TeamSpeak",
                 IsJoinButtonEnabled = false,
-                ServerInfo = "Loading...",
+                JoinServerToolTip = $@"Join: {_tsViewModel.TsChannelNameText}
+Password: {_tsViewModel.TsChannelPasswordText}",
 
-                ToolTip = @"Server Address: TS.grandtheftarma.com:9987,
+                ServerInfo = "Loading...",
+                ServerInfoToolTip = @"Server Address: TS.grandtheftarma.com:9987,
 TeamSpeak Selector: #ipsLayout_sidebar > div > ul > li:nth-child(2) > div > div:nth-child(3) > span,
 TeamSpeak Selector URL: http://grandtheftarma.com/",
 
@@ -563,7 +606,19 @@ TeamSpeak Selector URL: http://grandtheftarma.com/",
 
         public BindableCollection<ServersModel> Servers { get; set; } = new BindableCollection<ServersModel>();
 
-        public void JoinServer(ServersModel server) => Join.ServerTest(server);
+        public void ServersMouseEnter()
+        {
+            foreach (var server in Servers)
+            {
+                if (server.ContentButton == "Join Server")
+                    continue;
+
+                server.JoinServerToolTip = $@"Join: {_tsViewModel.TsChannelNameText}
+Password: {_tsViewModel.TsChannelPasswordText}";
+            }
+        }
+
+        public void JoinServer(ServersModel server) => Join.Server(server);
 
         public void MoveItemUp(ServersModel server)
         {
@@ -620,9 +675,9 @@ TeamSpeak Selector URL: http://grandtheftarma.com/",
                 {
                     ContentButton = "Join Server",
                     IsJoinButtonEnabled = false,
-                    ServerInfo = "Loading...",
 
-                    ToolTip = $@"Server Address: {ServerIpText},
+                    ServerInfo = "Loading...",
+                    ServerInfoToolTip = $@"Server Address: {ServerIpText},
 Server Port: {ServerQueryPortText}",
 
                     ServerIp = ServerIpText,
@@ -630,44 +685,6 @@ Server Port: {ServerQueryPortText}",
                 });
             else
                 MessageBox.Show($"The \"{ServerIpText}\" server address is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        private Brush _expanderColor;
-        public Brush ExpanderColor
-        {
-            get { return _expanderColor; }
-            set
-            {
-                _expanderColor = value;
-
-                NotifyOfPropertyChange(() => ExpanderColor);
-            }
-        }
-        private bool _isExpanderOpened;
-        public bool IsExpanderOpened
-        {
-            get { return _isExpanderOpened; }
-            set
-            {
-                _isExpanderOpened = value;
-
-                if (IsExpanderOpened)
-                {
-                    var win = Application.Current.MainWindow;
-
-                    TsViewModel.TsVm.Top = win.Top;
-                    TsViewModel.TsVm.Left = win.Left + win.ActualWidth + 1;
-
-                    dynamic settings = new ExpandoObject();
-                    settings.Owner = win;
-
-                    Helper.Manager.ShowWindowAsync(TsViewModel.TsVm, null, settings);
-                }
-                else
-                    _ = TsViewModel.TsVm.CloseWindow();
-
-                NotifyOfPropertyChange(() => IsExpanderOpened);
-            }
         }
 
         //Options tab

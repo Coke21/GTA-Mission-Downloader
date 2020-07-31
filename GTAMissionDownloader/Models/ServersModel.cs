@@ -19,6 +19,18 @@ namespace GTAMissionDownloader.Models
             }
         }
 
+        private string _joinServerToolTipVar;
+        public string JoinServerToolTip
+        {
+            get { return _joinServerToolTipVar; }
+            set
+            {
+                _joinServerToolTipVar = value;
+
+                OnPropertyChanged();
+            }
+        }
+
         private string _serverInfo;
         public string ServerInfo
         {
@@ -31,7 +43,7 @@ namespace GTAMissionDownloader.Models
             }
         }
 
-        public string ToolTip { get; set; }
+        public string ServerInfoToolTip { get; set; }
 
         private string _serverNoteInfo;
         public string ServerNoteInfo
