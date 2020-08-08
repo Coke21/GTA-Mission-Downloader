@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -99,9 +100,7 @@ namespace GTAMissionDownloader.Classes
             _mvm.IsLvEnabled = true;
 
             var requestedProgram = await Helper.GetFileRequest(Properties.ProgramId, "md5Checksum").ExecuteAsync();
-            string programMd5Checksum = CalculateMd5(Properties.GetProgramFolderPath + Properties.GetProgramName);
-
-            //_mvm.ProgramStatus = string.Empty;
+            string programMd5Checksum = CalculateMd5(Process.GetCurrentProcess().MainModule.FileName);
 
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -113,10 +112,13 @@ namespace GTAMissionDownloader.Classes
 
                 _mvm.IsUpdateVisible = Visibility.Visible;
 
-                var result = System.Windows.Forms.MessageBox.Show("A new update for GTA program has been detected. Download it?", "Update", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Information);
+                if (_mvm.UpdateNotify)
+                {
+                    var result = System.Windows.Forms.MessageBox.Show("A new update for GTA program has been detected. Download it?", "Update", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Information);
 
-                if (result == System.Windows.Forms.DialogResult.Yes)
-                    await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, "programUpdate");
+                    if (result == System.Windows.Forms.DialogResult.Yes)
+                        await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, "programUpdate");
+                }
             }
         }
 

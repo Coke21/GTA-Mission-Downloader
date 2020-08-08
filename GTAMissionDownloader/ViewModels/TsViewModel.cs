@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,9 +13,9 @@ namespace GTAMissionDownloader.ViewModels
 {
     public class TsViewModel : Screen
     {
-        public static TsViewModel TsVm;
         public string WindowName => "TeamSpeakWindow";
 
+        public static TsViewModel TsVm;
         private MainViewModel _mvm;
         public TsViewModel(MainViewModel mvm)
         {
@@ -28,7 +27,6 @@ namespace GTAMissionDownloader.ViewModels
                 .Properties(p => new { p.Top, p.Left })
                 .Property(p => p.Height, 430, "Window Height")
                 .Property(p => p.Width, 310, "Window Width")
-                .Property(p => p.ColumnWidth, 290, "Column Width")
 
                 .Property(p => p.TsItems, "Saved TS Channel paths")
 
@@ -88,8 +86,6 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
-        public void WindowSizeChanged() => ColumnWidth = Width - 20;
-
         public BindableCollection<TsModel> TsItems { get; set; } = new BindableCollection<TsModel>();
 
         private TsModel _selectedItem;
@@ -107,39 +103,20 @@ namespace GTAMissionDownloader.ViewModels
         //HotKey
         public void LvItemHotKeys(KeyEventArgs keyArgs)
         {
-            if (keyArgs.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                Clipboard.SetDataObject(SelectedItem.ChannelPath);
-
             if (keyArgs.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                AddFile();
+                if (TsItems.All(item => item.ChannelPath != TsChannelNameText))
+                    TsItems.Add(new TsModel()
+                    {
+                        ChannelPath = TsChannelNameText,
+                        ChannelPassword = TsChannelPasswordText
+                    });
+                else
+                    MessageBox.Show($"The \"{TsChannelNameText}\" channel is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
             if (keyArgs.Key == Key.Delete)
                 DeletePath();
         }
 
-        public void LvMouseEnter(ListView lv) => lv.Focus();
-
-        //DragDrop
-        public void LvMouseMoveDragDrop(TsView view)
-        {
-            if (SelectedItem == null)
-                return;
-
-            if (Mouse.LeftButton != MouseButtonState.Pressed) 
-                return;
-
-            DragDrop.DoDragDrop(view, SelectedItem.ChannelPath, DragDropEffects.Copy);
-        }
-
-        //On drop on listview
-        public void PathDropLv(DragEventArgs dragArgs)
-        {
-            if (!dragArgs.Data.GetDataPresent(DataFormats.Text)) 
-                return;
-
-            Clipboard.SetDataObject((string)dragArgs.Data.GetData(DataFormats.Text) ?? throw new InvalidOperationException());
-            AddFile();
-        }
         //Unselect items
         public void LvMouseDown(TsView view, Point e)
         {
@@ -148,34 +125,79 @@ namespace GTAMissionDownloader.ViewModels
                 foreach (var item in TsItems)
                     item.IsSelected = false;
         }
-        //Add, copy, remove
-        public void AddFile()
+
+        public void LvMouseEnter(ListView lv) => lv.Focus();
+
+        //Resize columns
+        public void LvLoaded(ListView listview) => LvSizeChanged(listview);
+        public void LvSizeChanged(ListView listView)
         {
-            if (Clipboard.GetText() == "") 
+            GridView gridView = listView.View as GridView;
+
+            var workingWidth = listView.ActualWidth - 5;
+            var col1 = 0.50;
+            var col2 = 0.50;
+
+            if (workingWidth < 0)
                 return;
 
-            if (TsItems.All(item => item.ChannelPath != Clipboard.GetText()))
-                TsItems.Add(new TsModel()
-                {
-                    ChannelPath = Clipboard.GetText()
-                });
-            else
-                MessageBox.Show($"The \"{Clipboard.GetText()}\" parameter is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            gridView.Columns[0].Width = workingWidth * col1;
+            gridView.Columns[1].Width = workingWidth * col2;
         }
 
-        public void CopyPath()
+        //On drop on listview
+        public void ChannelDropLv(DragEventArgs dragArgs)
         {
-            foreach (var item in TsItems)
-                if (item.IsSelected)
-                    Clipboard.SetDataObject(item.ChannelPath);
+            if (!dragArgs.Data.GetDataPresent(DataFormats.Text)) 
+                return;
+
+            if (TsItems.All(item => item.ChannelPath != TsChannelNameText))
+                TsItems.Add(new TsModel()
+                {
+                    ChannelPath = TsChannelNameText,
+                    ChannelPassword = TsChannelPasswordText
+                });
+            else
+                MessageBox.Show($"The \"{TsChannelNameText}\" channel is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        //DragDrop
+        public void LvMouseMoveDragDrop(TsView view)
+        {
+            if (Mouse.LeftButton != MouseButtonState.Pressed) 
+                return;
+
+            if (SelectedItem == null)
+                return;
+
+            if (Mouse.DirectlyOver.GetType() == typeof(TextBox))
+                return;
+
+            DragDrop.DoDragDrop(view, new DataObject(SelectedItem), DragDropEffects.Copy);
+        }
+
+        public void AddFile()
+        {
+            if (string.IsNullOrWhiteSpace(TsChannelNameText))
+                return;
+
+            if (TsItems.All(item => item.ChannelPath != TsChannelNameText))
+                TsItems.Add(new TsModel()
+                {
+                    ChannelPath = TsChannelNameText,
+                    ChannelPassword = TsChannelPasswordText
+                });
+            else
+                MessageBox.Show($"The \"{TsChannelNameText}\" channel is already in the list!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         public void DeletePath()
         {
-            foreach (var item in TsItems.ToList())
-                if (item.IsSelected)
-                    TsItems.Remove(item);
-        }
+            if (SelectedItem == null)
+                return;
+
+            TsItems.Remove(SelectedItem);
+        } 
 
         //Channel Name drop
         private string _tsChannelNameText;
@@ -189,12 +211,16 @@ namespace GTAMissionDownloader.ViewModels
                 NotifyOfPropertyChange(() => TsChannelNameText);
             }
         }
+        public void DragOverChannelName(DragEventArgs e) => e.Handled = true;
         public void DropChannelName(DragEventArgs e)
         {
-            TsChannelNameText = string.Empty;
+            if (!e.Data.GetDataPresent(typeof(TsModel)))
+                return;
 
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                TsChannelNameText = (string)e.Data.GetData(DataFormats.FileDrop);
+            var channel = e.Data.GetData(typeof(TsModel)) as TsModel;
+
+            TsChannelNameText = channel.ChannelPath;
+            TsChannelPasswordText = channel.ChannelPassword;
         }
 
         //Channel Password drop
@@ -209,25 +235,16 @@ namespace GTAMissionDownloader.ViewModels
                 NotifyOfPropertyChange(() => TsChannelPasswordText);
             }
         }
+        public void DragOverChannelPassword(DragEventArgs e) => e.Handled = true;
         public void DropChannelPassword(DragEventArgs e)
         {
-            TsChannelPasswordText = string.Empty;
+            if (!e.Data.GetDataPresent(typeof(TsModel)))
+                return;
 
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                TsChannelPasswordText = (string)e.Data.GetData(DataFormats.FileDrop);
-        }
+            var channel = e.Data.GetData(typeof(TsModel)) as TsModel;
 
-        //Grid Column Width
-        private double _columnWidth;
-        public double ColumnWidth
-        {
-            get { return _columnWidth; }
-            set
-            {
-                _columnWidth = value;
-
-                NotifyOfPropertyChange(() => ColumnWidth);
-            }
+            TsChannelNameText = channel.ChannelPath;
+            TsChannelPasswordText = channel.ChannelPassword;
         }
 
         public void OnClose() => _mvm.IsExpanderOpened = false;

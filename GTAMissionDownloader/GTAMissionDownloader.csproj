@@ -15,21 +15,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.14.0-alpha-789" />
+    <PackageReference Include="AngleSharp" Version="0.14.0" />
     <PackageReference Include="Caliburn.Micro" Version="4.0.138-rc" />
-    <PackageReference Include="Google.Apis" Version="1.43.0" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.43.0" />
-    <PackageReference Include="Google.Apis.Core" Version="1.43.0" />
-    <PackageReference Include="Google.Apis.Drive.v3" Version="1.43.0.1863" />
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf.NetCore" Version="1.0.10" />
-    <PackageReference Include="Jot" Version="2.1.4" />
-    <PackageReference Include="MahApps.Metro" Version="2.0.0" />
-    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.2.0" />
+    <PackageReference Include="Google.Apis" Version="1.48.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.48.0" />
+    <PackageReference Include="Google.Apis.Core" Version="1.48.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.48.0.2021" />
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf.NetCore" Version="1.0.13" />
+    <PackageReference Include="Jot" Version="2.1.7" />
+    <PackageReference Include="MahApps.Metro" Version="2.1.1" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.4.0" />
     <PackageReference Include="QueryMaster" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\gtaIcon.ico" />
+    <Resource Include="Images\gtaIcon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

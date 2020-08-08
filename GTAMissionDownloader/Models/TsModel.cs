@@ -5,8 +5,6 @@ namespace GTAMissionDownloader.Models
 {
     public class TsModel : INotifyPropertyChanged
     {
-        public string ChannelPath { get; set; }
-
         private bool _isSelected;
         public bool IsSelected
         {
@@ -14,6 +12,30 @@ namespace GTAMissionDownloader.Models
             set
             {
                 _isSelected = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        private string _channelPath;
+        public string ChannelPath
+        {
+            get { return _channelPath; }
+            set
+            {
+                _channelPath = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        private string _channelPassword;
+        public string ChannelPassword
+        {
+            get { return _channelPassword; }
+            set
+            {
+                _channelPassword = value;
 
                 OnPropertyChanged();
             }

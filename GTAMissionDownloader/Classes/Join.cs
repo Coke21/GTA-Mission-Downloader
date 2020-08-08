@@ -25,9 +25,6 @@ namespace GTAMissionDownloader.Classes
         }
 
         private static string GetRegistryArma3Path { get; } = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\bohemia interactive\arma 3", "main", string.Empty) + @"\arma3battleye";
-        //private static string[] ServerIps { get; } = { "164.132.200.53:2302", "164.132.202.63:2602", "164.132.202.63:2302", "ts3server://TS.grandtheftarma.com:9987" };
-        //#ipsLayout_sidebar > div > ul > li.ipsWidget.ipsWidget_vertical.ipsBox.ipsResponsive_block > div > div:nth-child(4) > a > span.ipsBadge.right
-
         public static void Server(ServersModel serverModel)
         {
             try
@@ -51,19 +48,19 @@ namespace GTAMissionDownloader.Classes
             {
                 while (true)
                 {
-                    try
+                    foreach (var serverModel in _mvm.Servers.ToList())
                     {
-                        foreach (var serverModel in _mvm.Servers.ToList())
+                        try
                         {
-                            if (!string.IsNullOrWhiteSpace(serverModel.TsSelector))
+                            if (serverModel.ContentButton == "Join TeamSpeak")
                             {
                                 var document = await BrowsingContext.New(Configuration.Default.WithDefaultLoader()).OpenAsync(serverModel.TsSelectorUrl);
-                                var cells = document.QuerySelectorAll(serverModel.TsSelector);
+                                var cells = document.QuerySelectorAll(string.IsNullOrWhiteSpace(serverModel.TsSelector) ? "null" : serverModel.TsSelector);
                                 var stuff = cells.Select(m => m.TextContent).ToList();
 
                                 if (!stuff.Any())
                                 {
-                                    serverModel.ServerInfo = "Invalid Selector";
+                                    serverModel.ServerInfo = string.IsNullOrWhiteSpace(serverModel.TsSelector) ? "TS Selector Not Provided" : "Invalid Selector";
                                     serverModel.IsJoinButtonEnabled = true;
                                     continue;
                                 }
@@ -109,13 +106,13 @@ namespace GTAMissionDownloader.Classes
                                     serverModel.IsJoinButtonEnabled = false;
                                 }
                             }
+
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show($"Exception raised: {e.Message}\n->{serverModel.ServerIp}:{serverModel.ServerQueryPort} is wrong!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show($"Exception raised: {e.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-
                     await Task.Delay(5_000);
                 }
             });

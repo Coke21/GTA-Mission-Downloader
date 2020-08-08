@@ -88,7 +88,7 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
-        //Second window move
+        //Main window stuff
         public void WindowLocationChanged()
         {
             var win = Application.Current.MainWindow;
@@ -96,9 +96,18 @@ namespace GTAMissionDownloader.ViewModels
             TsViewModel.TsVm.Top = win.Top;
             TsViewModel.TsVm.Left = win.Left + win.ActualWidth + 1;
         }
-
         public void WindowSizeChanged() => WindowLocationChanged();
+        public void WindowStateChanged()
+        {
+            if (WindowState == WindowState.Minimized)
+                if (IsHiddenChecked && ShowInTaskbar)
+                {
+                    ShowInTaskbar = false;
+                    WindowVisibility = Visibility.Hidden;
+                }
+        }
 
+        //Constructor
         private TsViewModel _tsViewModel;
         public MainViewModel()
         {
@@ -119,24 +128,27 @@ namespace GTAMissionDownloader.ViewModels
             Persistence.Tracker.Configure<MainViewModel>()
                 .Id(p => p.WindowName, includeType: false)
                 .Property(p => p.Height, 430, "Window Height")
-                .Property(p => p.Width, 850, "Window Width")
+                .Property(p => p.Width, 900, "Window Width")
 
                 .Property(p => p.MissionItems, "Saved Mission File(s)")
-                .Property(p => p.MfColumnWidth, new GridLength(280, GridUnitType.Pixel), "GridSplitter Column Width")
-                .Property(p => p.IgnoredItems, "Ignored Item(s)")
+                .Property(p => p.MfColumnWidth, new GridLength(290, GridUnitType.Pixel), "GridSplitter Column Width")
+                //.Property(p => p.IsSubscribeAllChecked, false, "Subscribe All Toggle Button")
 
-                .Property(p => p.Accents, "Accent Items")
+                .Property(p => p.IgnoredItems, "Ignored Item(s)")
 
                 .Property(p => p.TsSelectorUrlText, "https://grandtheftarma.com/", "TeamSpeak Selector URL")
                 .Property(p => p.Servers, "Saved Servers")
 
                 .Property(p => p.ThemeToggleSwitch, false, "Theme")
+                .Property(p => p.Accents, "Accent Items")
                 .Property(p => p.SelectedAccentIndex, 1, "Selected Accent")
 
                 .Property(p => p.IsStartUpChecked, false, "StartUp Checkbox")
                 .Property(p => p.IsHiddenChecked, false, "Hide at Startup Checkbox")
+                .Property(p => p.IsServerChecked, false, "Join Game Server Automatically Checkbox")
                 .Property(p => p.IsTsChecked, false, "Run TS Automatically Checkbox")
                 .Property(p => p.IsAutomaticUpdateChecked, false, "Automatic Update Checkbox")
+                .Property(p => p.UpdateNotify, true, "Update Notify Checkbox")
 
                 .PersistOn(nameof(PropertyChanged));
 
@@ -156,12 +168,30 @@ namespace GTAMissionDownloader.ViewModels
                 WindowVisibility = Visibility.Hidden;
             }
 
-            //if (IsTsChecked)
-            //    if (Process.GetProcessesByName("ts3client_win64").Length == 0)
-            //        Join.Server("Ts");
+            if (IsServerChecked)
+                if (Process.GetProcessesByName("arma3_x64").Length == 0 && Process.GetProcessesByName("arma3").Length == 0 && Process.GetProcessesByName("arma3launcher").Length == 0)
+                    foreach (var server in Servers)
+                    {
+                        if (server.ContentButton == "Join TeamSpeak")
+                            continue;
+
+                        Join.Server(server);
+                        break;
+                    }
+
+            if (IsTsChecked)
+                if (Process.GetProcessesByName("ts3client_win64").Length == 0)
+                    foreach (var server in Servers)
+                    {
+                        if (server.ContentButton != "Join TeamSpeak") 
+                            continue;
+
+                        Join.Server(server);
+                        break;
+                    }
 
             if (!IsAutomaticUpdateChecked)
-                _ = Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+                _= Update.FilesCheckAsync(Helper.CtsOnStart.Token);
             #endregion
         }
 
@@ -258,14 +288,26 @@ namespace GTAMissionDownloader.ViewModels
 
             DragDrop.DoDragDrop(view, new DataObject(myList), DragDropEffects.Copy);
         }
+        public async Task MissionDropLv(DragEventArgs dragArgs)
+        {
+            if (!dragArgs.Data.GetDataPresent(typeof(List<IgnoredModel>)))
+                return;
+
+            var droppedItems = dragArgs.Data.GetData(typeof(List<IgnoredModel>)) as List<IgnoredModel>;
+
+            foreach (var droppedItem in droppedItems)
+                IgnoredItems.Remove(droppedItem);
+
+            await Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+        }
         public void LvMfSizeChanged(ListView listView)
         {
             GridView gridView = listView.View as GridView;
 
             var workingWidth = listView.ActualWidth - 5;
             var col1 = 0.50;
-            var col2 = 0.30;
-            var col3 = 0.15;
+            var col2 = 0.25;
+            var col3 = 0.20;
             var col4 = 0.05;
 
             if (workingWidth < 0)
@@ -281,7 +323,7 @@ namespace GTAMissionDownloader.ViewModels
         {
             if (IsAutomaticUpdateChecked)
             {
-                MessageBox.Show("You cannot have the automatic update checkbox ticked! Untick the checkbox to manually download a file!", "Information", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                MessageBox.Show("You cannot have the Automatic Update Checkbox (in Options) ticked! Untick the checkbox to manually download a file!", "Information", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                 return;
             }
 
@@ -305,10 +347,41 @@ namespace GTAMissionDownloader.ViewModels
             foreach (var item in MissionItems)
                 if (item.IsSelected)
                 {
-                    File.Delete(Properties.GetArma3MissionFolderPath + item.Mission);
-                    item.IsMissionUpdated = "Missing";
-                    item.IsModifiedTimeUpdated = "Missing";
+                    try
+                    {
+                        File.Delete(Properties.GetArma3MissionFolderPath + item.Mission);   
+                        item.IsMissionUpdated = "Missing";
+                        item.IsModifiedTimeUpdated = "Missing";
+                    }
+                    catch (IOException e)
+                    {
+                        MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
+        }
+
+        //private bool _isSubscribeAllChecked;
+        //public bool IsSubscribeAllChecked
+        //{
+        //    get { return _isSubscribeAllChecked; }
+        //    set
+        //    {
+        //        _isSubscribeAllChecked = value;
+
+        //        NotifyOfPropertyChange(() => IsSubscribeAllChecked);
+        //    }
+        //}
+
+        public void SubscribeAll()
+        {
+            foreach (var mission in MissionItems)
+                mission.IsChecked = true;
+        }
+
+        public void UnSubscribeAll()
+        {
+            foreach (var mission in MissionItems)
+                mission.IsChecked = false;
         }
 
         public void SubscribeUnChecked()
@@ -326,7 +399,9 @@ namespace GTAMissionDownloader.ViewModels
                                                               "Subscription of the mission files:\n" +
                                                               "1.Choose the mission files that you want to observe.\n" +
                                                               "2.Tick them.\n" +
-                                                              "3.Go to Options tab and tick the Automatic Update checkbox.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                                                              "3.Go to Options tab and tick the Automatic Update checkbox.\n\n" +
+                                                              
+                                                              "If you want to ignore certain mission files, you just drag & drop them on the right list.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 
         //GridSplitter
         private GridLength _mfColumnWidth;
@@ -351,7 +426,21 @@ namespace GTAMissionDownloader.ViewModels
                 foreach (var item in IgnoredItems)
                     item.IsSelected = false;
         }
+        public void LvIgnoredMouseMoveDragDrop(MainView view)
+        {
+            if (Mouse.LeftButton != MouseButtonState.Pressed)
+                return;
 
+            List<IgnoredModel> myList = new List<IgnoredModel>();
+            foreach (var missionItem in IgnoredItems)
+                if (missionItem.IsSelected)
+                    myList.Add(missionItem);
+
+            if (myList.Count == 0)
+                return;
+
+            DragDrop.DoDragDrop(view, new DataObject(myList), DragDropEffects.Copy);
+        }
         public void ItemDropLv(DragEventArgs dragArgs)
         {
             if (!dragArgs.Data.GetDataPresent(typeof(List<MissionModel>)))
@@ -466,10 +555,10 @@ namespace GTAMissionDownloader.ViewModels
 
         public void AddTs()
         {
-            if (string.IsNullOrWhiteSpace(ServerIpText) || string.IsNullOrWhiteSpace(TsSelectorText) || string.IsNullOrWhiteSpace(TsSelectorUrlText))
+            if (string.IsNullOrWhiteSpace(ServerIpText) || string.IsNullOrWhiteSpace(TsSelectorUrlText))
                 return;
 
-            var tsItem = Servers.FirstOrDefault(i => i.TsSelectorUrl == TsSelectorUrlText);
+            var tsItem = Servers.FirstOrDefault(i => i.ServerIp == ServerIpText);
 
             if (tsItem != null)
             {
@@ -477,7 +566,7 @@ namespace GTAMissionDownloader.ViewModels
                 return;
             }
 
-            if (Servers.All(item => item.TsSelector != TsSelectorText))
+            if (Servers.All(item => item.ServerIp != ServerIpText))
                 Servers.Add(new ServersModel()
                 {
                     ContentButton = "Join TeamSpeak",
@@ -486,8 +575,8 @@ namespace GTAMissionDownloader.ViewModels
 Password: {_tsViewModel.TsChannelPasswordText}",
 
                     ServerInfo = "Loading...",
-                    ServerInfoToolTip = $@"Server Address: {ServerIpText},
-TeamSpeak Selector: {TsSelectorText},
+                    ServerInfoToolTip = $@"Server Address: {ServerIpText}
+TeamSpeak Selector: {TsSelectorText}
 TeamSpeak Selector URL: {TsSelectorUrlText}",
 
                     ServerIp = ServerIpText,
@@ -549,8 +638,8 @@ TeamSpeak Selector URL: {TsSelectorUrlText}",
                 IsJoinButtonEnabled = false,
 
                 ServerInfo = "Loading...",
-                ServerInfoToolTip = @"Server Address: 164.132.200.53,
-Server Port: 2302",
+                ServerInfoToolTip = @"Server Address: 164.132.200.53
+Server Query Port: 2302",
 
                 ServerIp = "164.132.200.53",
                 ServerQueryPort = "2302"
@@ -562,8 +651,8 @@ Server Port: 2302",
                 IsJoinButtonEnabled = false,
 
                 ServerInfo = "Loading...",
-                ServerInfoToolTip = @"Server Address: 164.132.202.63,
-Server Port: 2302",
+                ServerInfoToolTip = @"Server Address: 164.132.202.63
+Server Query Port: 2302",
 
                 ServerIp = "164.132.202.63",
                 ServerQueryPort = "2302"
@@ -577,8 +666,8 @@ Server Port: 2302",
 Password: {_tsViewModel.TsChannelPasswordText}",
 
                 ServerInfo = "Loading...",
-                ServerInfoToolTip = @"Server Address: TS.grandtheftarma.com:9987,
-TeamSpeak Selector: #ipsLayout_sidebar > div > ul > li:nth-child(2) > div > div:nth-child(3) > span,
+                ServerInfoToolTip = @"Server Address: TS.grandtheftarma.com:9987
+TeamSpeak Selector: #ipsLayout_sidebar > div > ul > li:nth-child(2) > div > div:nth-child(3) > span
 TeamSpeak Selector URL: http://grandtheftarma.com/",
 
                 ServerIp = "TS.grandtheftarma.com:9987",
@@ -591,17 +680,25 @@ TeamSpeak Selector URL: http://grandtheftarma.com/",
         {
             MessageBox.Show(@"This tab allows you to add ArmA 3/TeamSpeak servers and ""watch"" them:
 1.If you want to add ArmA 3 Servers:
-2.If you want to add TeamSpeak:", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-//            MessageBox.Show(
-//                @"The First Box:
-//Specify TeamSpeak address.
-//The Second Box:
-//If you want to see the current number on TS, you need to specify the selector.
-//This is how you can get it:
-//1.Go to main GTA website
-//2.Right click on Number/256 and click Inspect
-//3.Right click on highlited HTML Elements, copy, copy selector
-//4.Paste in the field.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+-Provide Server IP (e.g. 164.132.200.53) and Server Query Port (e.g. 2302),
+-Click ""Add Server"" button.
+
+2.If you want to add TeamSpeak Servers:
+-Add TeamSpeak Server IP (e.g. TS.grandtheftarma.com:9987)
+
+If you want to see the current number of TeamSpeak users:
+-Click ""Show TeamSpeak settings"" button,
+-Provide TeamSpeak Selector.
+
+This is how you can get it:
+1.Go to main GTA website,
+2.Right click on Number/256 and click Inspect,
+3.Right click on highlited HTML Elements, copy, copy selector,
+4.Paste in the field.
+
+-Provide the location of the selector, e.g. ""https://grandtheftarma.com/""
+
+3. Click ""Add Ts"" button.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public BindableCollection<ServersModel> Servers { get; set; } = new BindableCollection<ServersModel>();
@@ -677,8 +774,8 @@ Password: {_tsViewModel.TsChannelPasswordText}";
                     IsJoinButtonEnabled = false,
 
                     ServerInfo = "Loading...",
-                    ServerInfoToolTip = $@"Server Address: {ServerIpText},
-Server Port: {ServerQueryPortText}",
+                    ServerInfoToolTip = $@"Server Address: {ServerIpText}
+Server Query Port: {ServerQueryPortText}",
 
                     ServerIp = ServerIpText,
                     ServerQueryPort = ServerQueryPortText
@@ -752,9 +849,9 @@ Server Port: {ServerQueryPortText}",
                 _isStartUpChecked = value;
 
                 if (IsStartUpChecked)
-                    Properties.KeyStartUp.SetValue("GTADownloader", System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    Properties.KeyStartUp.SetValue("GTA Mission Downloader", Process.GetCurrentProcess().MainModule.FileName);
                 else
-                    Properties.KeyStartUp.DeleteValue("GTADownloader", false);
+                    Properties.KeyStartUp.DeleteValue("GTA Mission Downloader", false);
 
                 NotifyOfPropertyChange(() => IsStartUpChecked);
             }
@@ -771,7 +868,6 @@ Server Port: {ServerQueryPortText}",
                 NotifyOfPropertyChange(() => IsStartUpEnabled);
             }
         }
-
 
         private bool _isHiddenChecked;
         public bool IsHiddenChecked
@@ -793,6 +889,18 @@ Server Port: {ServerQueryPortText}",
                 }
 
                 NotifyOfPropertyChange(() => IsHiddenChecked);
+            }
+        }
+
+        private bool _isServerChecked;
+        public bool IsServerChecked
+        {
+            get { return _isServerChecked; }
+            set
+            {
+                _isServerChecked = value; 
+
+                NotifyOfPropertyChange(() => IsServerChecked);
             }
         }
 
@@ -847,6 +955,18 @@ Server Port: {ServerQueryPortText}",
                 _isAutomaticUpdateEnabled = value; 
 
                 NotifyOfPropertyChange(() => IsAutomaticUpdateEnabled);
+            }
+        }
+
+        private bool _updateNotify;
+        public bool UpdateNotify
+        {
+            get { return _updateNotify; }
+            set
+            {
+                _updateNotify = value;
+
+                NotifyOfPropertyChange(() => UpdateNotify);
             }
         }
 

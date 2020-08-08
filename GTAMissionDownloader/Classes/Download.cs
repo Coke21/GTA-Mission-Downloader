@@ -28,7 +28,12 @@ namespace GTAMissionDownloader.Classes
             var requestedFile = await request.ExecuteAsync();
 
             string mFPath = Path.Combine(Properties.GetArma3MissionFolderPath, requestedFile.Name);
-            string programPath = Path.Combine(Properties.GetProgramFolderPath, requestedFile.Name + ".exe");
+            string programPath = string.Empty;
+            if (option == "programUpdate")
+            {
+                File.Move(Process.GetCurrentProcess().MainModule.FileName, Process.GetCurrentProcess().MainModule.FileName + "OLD.exe");
+                programPath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), requestedFile.Name + ".exe");
+            }
 
             await using (MemoryStream stream = new MemoryStream())
             await using (FileStream file = new FileStream(option == "missionFile" ? mFPath : programPath, FileMode.Create, FileAccess.Write))
@@ -81,8 +86,6 @@ namespace GTAMissionDownloader.Classes
             }
             if (option == "programUpdate")
             {
-                File.Move(Properties.GetProgramFolderPath + Properties.GetProgramName, Properties.GetProgramFolderPath + Properties.GetProgramName + "OLD.exe");
-
                 Process.Start(new ProcessStartInfo()
                 {
                     FileName = programPath,
@@ -92,7 +95,7 @@ namespace GTAMissionDownloader.Classes
                 Process.Start(new ProcessStartInfo()
                 {
                     FileName = "cmd.exe",
-                    Arguments = "/C choice /C Y /N /D Y /T 3 & Del \"" + Properties.GetProgramFolderPath + Properties.GetProgramName + "OLD.exe",
+                    Arguments = "/C choice /C Y /N /D Y /T 3 & Del \"" + Process.GetCurrentProcess().MainModule.FileName + "OLD.exe",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     CreateNoWindow = true,
                     UseShellExecute = true

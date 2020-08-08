@@ -10,11 +10,12 @@
         Title="{Binding AppTitle, Mode=OneTime}" TitleCharacterCasing="Normal"
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         MinHeight="430" MinWidth="800" WindowStartupLocation="CenterScreen"
-        d:DesignHeight="430" d:DesignWidth="850"
+        d:DesignHeight="430" d:DesignWidth="900" ShowMaxRestoreButton="False"
         WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
-        Icon="{Binding IconPath}" 
+        Icon="{Binding IconPath}"
         cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged];
-                            [Event SizeChanged] = [Action WindowSizeChanged];" ShowMaxRestoreButton="False">
+                            [Event SizeChanged] = [Action WindowSizeChanged];
+                            [Event StateChanged] = [Action WindowStateChanged];">
 
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
@@ -60,7 +61,7 @@
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconMaterial Kind="Plus" VerticalAlignment="Center"/>
 
-                            <TextBlock Text="Add Ts" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                            <TextBlock Text="Add TS" VerticalAlignment="Center" Margin="2 0 0 0"/>
                         </StackPanel>
                     </Button>
 
@@ -93,7 +94,7 @@
                     <ColumnDefinition Width="1" />
                     <ColumnDefinition Width="1.9*" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="{Binding MfColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <ColumnDefinition Width="{Binding MfColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxWidth="{Binding Width}"/>
                     <ColumnDefinition Width="1" />
                 </Grid.ColumnDefinitions>
 
@@ -146,9 +147,10 @@
                 </Button>
 
                 <ListView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding MissionItems}"
-                          IsEnabled="{Binding IsLvEnabled}" AllowDrop="False" 
+                          IsEnabled="{Binding IsLvEnabled}" AllowDrop="True" 
                           cal:Message.Attach="[Event MouseDown] = [Action LvMouseDown($view, $mousepoint)];
                                               [Event MouseMove] = [Action LvMouseMoveDragDrop($view)];
+                                              [Event PreviewDrop] = [Action MissionDropLv($eventArgs)];
                                               [Event SizeChanged] = [Action LvMfSizeChanged($source)];"
                           BorderThickness="1.000001" Margin="0 1 0 0">
 
@@ -169,7 +171,7 @@
                                             </MenuItem.Icon>
                                         </MenuItem>
 
-                                        <MenuItem Header="Delete" cal:Message.Attach="DeleteMission" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
+                                        <MenuItem Header="Delete (from your PC)" cal:Message.Attach="DeleteMission" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
                                             <MenuItem.Icon>
                                                 <iconPacks:PackIconMaterial Kind="TrashCanOutline" HorizontalAlignment="Center"/>
                                             </MenuItem.Icon>
@@ -239,7 +241,25 @@
                             </GridViewColumn>
 
                             <GridViewColumn>
-                                <GridViewColumnHeader Content="Subscribe?" ToolTip="Add the selected Mission file(s) to the queue"/>
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <TextBlock Text="Subscribe?" ToolTip="Add the selected Mission file(s) to the queue"/>
+
+                                            <!--<ToggleButton IsChecked="{Binding DataContext.IsSubscribeAllChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                                <iconPacks:Material Kind="CheckCircleOutline"/>
+                                            </ToggleButton>-->
+
+                                            <ToggleButton cal:Message.Attach="[Event Checked] = [Action SubscribeAll];
+                                                                              [Event Unchecked] = [Action UnSubscribeAll];" 
+                                                          Style="{DynamicResource MahApps.Styles.Button.Circle}"
+                                                          ToolTip="(Un)Check all Mission files" Margin="5 0 0 0">
+                                                <iconPacks:Material Kind="CheckCircleOutline"/>
+                                            </ToggleButton>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsChecked}" cal:Message.Attach="[Event Unchecked] = [Action SubscribeUnChecked];"/>
@@ -267,11 +287,12 @@
                     </ListView.View>
                 </ListView>
 
-                <GridSplitter Grid.Column="2" Grid.Row="2" Width="5" 
-                              ShowsPreview="False" Margin="2 0 0 0"/>
+                <GridSplitter Grid.Column="2" Grid.Row="2" Width="5" ShowsPreview="False"
+                              Margin="2 0 0 0"/>
 
                 <ListView Grid.Column="3" Grid.Row="2" ItemsSource="{Binding IgnoredItems}" 
                           cal:Message.Attach="[Event MouseDown] = [Action IgnoreLvMouseDown($view, $mousepoint)];
+                                              [Event MouseMove] = [Action LvIgnoredMouseMoveDragDrop($view)];
                                               [Event PreviewDrop] = [Action ItemDropLv($eventArgs)];
                                               [Event SizeChanged] = [Action LvIgnoredSizeChanged($source)];"
                           AllowDrop="True" BorderThickness="1.000001" Margin="2 1 0 0">
@@ -287,7 +308,7 @@
                             <Setter Property="ContextMenu">
                                 <Setter.Value>
                                     <ContextMenu>
-                                        <MenuItem Header="Delete" cal:Message.Attach="DeleteIgnoredItem" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
+                                        <MenuItem Header="Delete (from the Ignored list)" cal:Message.Attach="DeleteIgnoredItem" cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.Tag.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}">
                                             <MenuItem.Icon>
                                                 <iconPacks:PackIconMaterial Kind="TrashCanOutline" HorizontalAlignment="Center"/>
                                             </MenuItem.Icon>
@@ -520,7 +541,7 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <GroupBox Grid.Column="1" Grid.Row="1" Margin="0 5 0 0">
+                            <GroupBox Grid.Column="1" Grid.Row="1" Margin="0 2 0 0">
                                 <GroupBox.HeaderTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -532,38 +553,46 @@
                                 </GroupBox.HeaderTemplate>
 
                                 <StackPanel>
-                                    <CheckBox Content="Startup" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
-                                              HorizontalAlignment="Center" ToolTip="Run the program automatically upon PC restart"/>
-
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <CheckBox Content="Hidden" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run"/>
+                                        <CheckBox Content="Startup" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
+                                                  HorizontalAlignment="Center" ToolTip="Run the program automatically upon PC restart"/>
 
-                                        <CheckBox Content="TS" IsChecked="{Binding IsTsChecked}" Margin="5 0 0 0"
-                                                  ToolTip="Run TeamSpeak automatically upon the program start"/>
+                                        <CheckBox Content="Hidden" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run and when minimised"
+                                                  Margin="2 0 0 0"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 2 0 0">
+                                        <CheckBox Content="Server" IsChecked="{Binding IsServerChecked}" ToolTip="Join the top Game Server automatically upon the program start"/>
+
+                                        <CheckBox Content="TS" IsChecked="{Binding IsTsChecked}" ToolTip="Run the top TeamSpeak automatically upon the program start"
+                                                  Margin="2 0 0 0"/>
                                     </StackPanel>
 
                                     <CheckBox Content="Automatic Update" IsChecked="{Binding IsAutomaticUpdateChecked}" IsEnabled="{Binding IsAutomaticUpdateEnabled}"
-                                              Margin="0 2 0 0" ToolTip="Automatically updates the ticked mission files"/>
+                                              HorizontalAlignment="Center" ToolTip="Automatically updates the ticked mission files" Margin="0 2 0 0"/>
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 3 0 0">
+                                    <CheckBox Content="Update Notify" IsChecked="{Binding UpdateNotify}" HorizontalAlignment="Center"
+                                              ToolTip="Notify when program is outdated" Margin="0 2 0 0"/>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 2 0 0">
                                         <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">
                                             <Image Source="{Binding IconPath}" Height="20" Width="20" 
                                                    RenderTransformOrigin="0.5,0.5" />
                                         </Button>
 
-                                        <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="3 0 0 0">
+                                        <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="2 0 0 0">
                                             <iconPacks:PackIconMaterial Kind="FileMultiple"/>
                                         </Button>
 
-                                        <Button x:Name="ManualDownload" ToolTip="Manually download the app" Margin="3 0 0 0">
+                                        <Button x:Name="ManualDownload" ToolTip="Manually download the app" Margin="2 0 0 0">
                                             <StackPanel Orientation="Horizontal">
                                                 <iconPacks:PackIconMaterial Kind="ArrowTopRight" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
 
-                                    <Button x:Name="BrowseOfficialThread" HorizontalAlignment="Center" ToolTip="Browse the Official thread"
-                                            Margin="0 3 0 0">
+                                    <Button x:Name="BrowseOfficialThread" HorizontalAlignment="Center" ToolTip="Got any suggestions/feedback? Post it here"
+                                            Margin="0 2 0 0">
                                         <StackPanel Orientation="Horizontal">
                                             <iconPacks:PackIconMaterial Kind="FileDocument" VerticalAlignment="Center"/>
 

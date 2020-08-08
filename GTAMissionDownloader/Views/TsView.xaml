@@ -12,8 +12,7 @@
         WindowStartupLocation="Manual" ShowMinButton="False" ShowMaxRestoreButton="False"
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         Top="{Binding Top, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Left="{Binding Left, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SourceInitialized="Window_SourceInitialized"
-        cal:Message.Attach="[Event SizeChanged] = [Action WindowSizeChanged];
-                            [Event Closing] = [Action OnClose];">
+        cal:Message.Attach="[Event Closing] = [Action OnClose];">
 
     <controls:MetroWindow.IconTemplate>
         <DataTemplate>
@@ -39,24 +38,20 @@
         <ListView Grid.Column="1" Grid.Row="1" SelectionMode="Single" SelectedItem="{Binding SelectedItem}"
                   BorderThickness="1.000001" ItemsSource="{Binding TsItems}" AllowDrop="True"
                   cal:Message.Attach="[Event PreviewKeyDown] = [Action LvItemHotKeys($eventArgs)]; 
-                                      [Event PreviewDrop] = [Action PathDropLv($eventArgs)];
                                       [Event MouseDown] = [Action LvMouseDown($view, $mousepoint)];
-                                      [Event PreviewMouseMove] = [Action LvMouseMoveDragDrop($view)];
-                                      [Event MouseEnter] = [Action LvMouseEnter($source)]"
+                                      [Event MouseEnter] = [Action LvMouseEnter($source)];
+                                      [Event Loaded] = [Action LvLoaded($source)];
+                                      [Event SizeChanged] = [Action LvSizeChanged($source)];
+                                      [Event PreviewDrop] = [Action ChannelDropLv($eventArgs)];
+                                      [Event MouseMove] = [Action LvMouseMoveDragDrop($view)];"
 
-                  ToolTip="Add,copy and remove channel paths, right click to open the menu or hotkeys - ctrl+c, ctrl+v, delete">
+                  ToolTip="Add and remove channel paths, right click to open the menu or hotkeys - ctrl+v, delete">
 
             <ListView.ContextMenu>
                 <ContextMenu cal:Action.TargetWithoutContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                     <MenuItem Header="Add" cal:Message.Attach="AddFile" InputGestureText="| CTRL + V">
                         <MenuItem.Icon>
                             <iconPacks:PackIconMaterial Kind="Plus" HorizontalAlignment="Center"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-
-                    <MenuItem Header="Copy" cal:Message.Attach="CopyPath" InputGestureText="| CTRL + C">
-                        <MenuItem.Icon>
-                            <iconPacks:PackIconMaterial Kind="ContentCopy" HorizontalAlignment="Center"/>
                         </MenuItem.Icon>
                     </MenuItem>
 
@@ -73,7 +68,8 @@
                     <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
 
                     <Setter Property="FontWeight" Value="Bold"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Margin" Value="0 2 0 0"/>
                 </Style>
             </ListView.ItemContainerStyle>
 
@@ -86,8 +82,25 @@
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
 
-                    <GridViewColumn Header="Channel Path(s):" Width="{Binding ColumnWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    DisplayMemberBinding="{Binding ChannelPath}"/>
+                    <GridViewColumn Header="Channel Paths:">
+
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding ChannelPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" TextWrapping="Wrap"
+                                         controls:TextBoxHelper.Watermark="Your Channel Path..." controls:TextBoxHelper.ClearTextButton="True"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="Passwords:">
+
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding ChannelPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" TextWrapping="Wrap"
+                                         controls:TextBoxHelper.Watermark="Your Channel Password..." controls:TextBoxHelper.ClearTextButton="True"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>
@@ -95,14 +108,16 @@
         <StackPanel Grid.Column="1" Grid.Row="2">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Height="40" Margin="0 5 0 0">
                 <TextBox Text="{Binding TsChannelNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AllowDrop="True"
-                         cal:Message.Attach="[Event PreviewDrop] = [Action DropChannelName($eventArgs)]"
+                         cal:Message.Attach="[Event PreviewDragOver] = [Action DragOverChannelName($eventArgs)];
+                                             [Event PreviewDrop] = [Action DropChannelName($eventArgs)];"
                          controls:TextBoxHelper.Watermark="Your channel path..." controls:TextBoxHelper.ClearTextButton="True"
                          ToolTip="Insert the FULL path to the TS channel (It's case-sensitive!) e.g. Staff Lounges/Waiting for Support"/>
             </ScrollViewer>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Height="40" Margin="0 5 0 0">
-                <TextBox Text="{Binding TsChannelPasswordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
-                         cal:Message.Attach="[Event PreviewDrop] = [Action DropChannelPassword($eventArgs)]" 
+                <TextBox Text="{Binding TsChannelPasswordText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AllowDrop="True"
+                         cal:Message.Attach="[Event PreviewDragOver] = [Action DragOverChannelPassword($eventArgs)];
+                                             [Event PreviewDrop] = [Action DropChannelPassword($eventArgs)];" 
                          controls:TextBoxHelper.Watermark="Your channel password..." controls:TextBoxHelper.ClearTextButton="True"
                          ToolTip="Insert the password to the channel or leave it empty"/>
             </ScrollViewer>

@@ -1,8 +1,10 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using GTAMissionDownloader.ViewModels;
 
 namespace GTAMissionDownloader.Classes
@@ -15,7 +17,7 @@ namespace GTAMissionDownloader.Classes
             _mvm = mvm;
 
             Helper.MyNotifyIcon.ToolTipText = "GTA Mission Downloader";
-            Helper.MyNotifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetEntryAssembly().ManifestModule.Name);
+            Helper.MyNotifyIcon.Icon = Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
             Helper.MyNotifyIcon.TrayLeftMouseUp += (a, b) => NotifyIconBalloonTipClicked(true, true);
             Helper.MyNotifyIcon.TrayBalloonTipClicked += (a, b) => NotifyIconBalloonTipClicked(false, false);
         }
@@ -24,8 +26,15 @@ namespace GTAMissionDownloader.Classes
             if (stopOnStart) 
                 StopNotification();
 
-            _mvm.WindowState = WindowState.Normal;
             _mvm.WindowVisibility = Visibility.Visible;
+            _mvm.ShowInTaskbar = true;
+
+            await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
+                new Action(delegate ()
+                {
+                    _mvm.WindowState = WindowState.Normal;
+                }));
+
             try
             {
                 if (areFilesUpdated)
