@@ -29,6 +29,8 @@ namespace GTAMissionDownloader.Classes
             listRequest.Q = $"'{Properties.FolderId}' in parents";
             var files = await listRequest.ExecuteAsync();
 
+            files.Files.Remove(files.Files.SingleOrDefault(r => r.Name == "readme.txt"));
+
             foreach (var item in _mvm.IgnoredItems)
                 files.Files.Remove(files.Files.SingleOrDefault(r => r.Id == item.FileId));
 

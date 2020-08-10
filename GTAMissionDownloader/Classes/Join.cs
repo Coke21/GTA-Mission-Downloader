@@ -31,8 +31,8 @@ namespace GTAMissionDownloader.Classes
             {
                 Process.Start(new ProcessStartInfo()
                 {
-                    FileName = string.IsNullOrWhiteSpace(serverModel.TsSelector) ? GetRegistryArma3Path : $"ts3server://{serverModel.ServerIp}?channel={_tvm.TsChannelNameText}" + $"&channelpassword={_tvm.TsChannelPasswordText}",
-                    Arguments = string.IsNullOrWhiteSpace(serverModel.TsSelector) ? $"-connect={serverModel.ServerIp}:{Convert.ToUInt16(serverModel.ServerQueryPort)}" : string.Empty,
+                    FileName = serverModel.ContentButton == "Join Server" ? GetRegistryArma3Path : $"ts3server://{serverModel.ServerIp}?channel={_tvm.TsChannelNameText}" + $"&channelpassword={_tvm.TsChannelPasswordText}",
+                    Arguments = serverModel.ContentButton == "Join Server" ? $"-connect={serverModel.ServerIp}:{Convert.ToUInt16(serverModel.ServerQueryPort)}" : string.Empty,
                     UseShellExecute = true
                 });
             }

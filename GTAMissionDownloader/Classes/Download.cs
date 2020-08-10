@@ -20,10 +20,11 @@ namespace GTAMissionDownloader.Classes
 
         public static async Task FileAsync(string fileId, MissionModel selectedItem, CancellationToken cancellationToken, string option = "missionFile")
         {
+            _mvm.IsProgressBarVisible = Visibility.Visible;
             _mvm.IsStopDownloadVisible = Visibility.Visible;
 
             var request = Helper.GetFileRequest(fileId, "size, name");
-            request.MediaDownloader.ChunkSize = 10000000;
+            request.MediaDownloader.ChunkSize = 1024 * 1024;
 
             var requestedFile = await request.ExecuteAsync();
 
@@ -44,10 +45,10 @@ namespace GTAMissionDownloader.Classes
                     {
                         case DownloadStatus.Downloading:
                             double bytesIn = progress.BytesDownloaded;
-
                             double currentValue = Math.Truncate(bytesIn / 1000000);
                             double totalValue = Math.Truncate((double)requestedFile.Size / 1000000);
 
+                            _mvm.ProgressBarValue = Convert.ToDouble(progress.BytesDownloaded * 100 / requestedFile.Size);
                             _mvm.DownloadInfoText = $"Downloading '{requestedFile.Name}' - " + currentValue + "MB/" + totalValue + "MB";
                             break;
 
@@ -58,18 +59,23 @@ namespace GTAMissionDownloader.Classes
                                 selectedItem.IsModifiedTimeUpdated = "Outdated";
                             }
 
+                            _mvm.ProgressBarValue = 0;
+                            _mvm.IsProgressBarVisible = Visibility.Hidden;
                             _mvm.DownloadInfoText = string.Empty;
                             _mvm.IsStopDownloadVisible = Visibility.Hidden;
                             break;
 
                         case DownloadStatus.Completed:
                             stream.WriteTo(file);
+
                             if (selectedItem != null)
                             {
                                 selectedItem.IsMissionUpdated = "Updated";
                                 selectedItem.IsModifiedTimeUpdated = "Updated";
                             }
 
+                            _mvm.ProgressBarValue = 0;
+                            _mvm.IsProgressBarVisible = Visibility.Hidden;
                             _mvm.DownloadInfoText = string.Empty;
                             _mvm.IsStopDownloadVisible = Visibility.Hidden;
                             break;

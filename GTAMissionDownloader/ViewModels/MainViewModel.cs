@@ -24,7 +24,6 @@ namespace GTAMissionDownloader.ViewModels
     public class MainViewModel : Screen
     {
         public string AppTitle => $"GTA Mission Downloader | {Properties.AppVersion} by Coke";
-        public string IconPath => "/Images/gtaIcon.ico";
         public string WindowName => "PrimaryWindow";
 
         private double _height;
@@ -114,6 +113,7 @@ namespace GTAMissionDownloader.ViewModels
             WindowState = WindowState.Normal;
             ShowInTaskbar = true;
             IsUpdateVisible = Visibility.Hidden;
+            IsProgressBarVisible = Visibility.Hidden;
             IsStopDownloadVisible = Visibility.Hidden;
             IsAutomaticUpdateEnabled = true;
 
@@ -153,6 +153,15 @@ namespace GTAMissionDownloader.ViewModels
                 .PersistOn(nameof(PropertyChanged));
 
             Persistence.Tracker.Track(this);
+
+            //Temporarily
+            Properties.KeyStartUp.DeleteValue("GTADownloader", false);
+            foreach (var item in IgnoredItems)
+                if (item.Item == "readme.txt")
+                {
+                    IgnoredItems.Remove(item);
+                    break;
+                }
 
             #region OnStart
             new Join(this, _tsViewModel);
@@ -485,6 +494,30 @@ namespace GTAMissionDownloader.ViewModels
         }
 
         //Below ListViews
+        private double _progressBarValue;
+        public double ProgressBarValue
+        {
+            get { return _progressBarValue; }
+            set
+            {
+                _progressBarValue = value; 
+
+                NotifyOfPropertyChange(() => ProgressBarValue);
+            }
+        }
+
+        private Visibility _isProgressBarVisible;
+        public Visibility IsProgressBarVisible
+        {
+            get { return _isProgressBarVisible; }
+            set
+            {
+                _isProgressBarVisible = value; 
+
+                NotifyOfPropertyChange(() => IsProgressBarVisible);
+            }
+        }
+
         private string _downloadInfoText;
         public string DownloadInfoText
         {

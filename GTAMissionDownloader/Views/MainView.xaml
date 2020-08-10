@@ -12,10 +12,19 @@
         MinHeight="430" MinWidth="800" WindowStartupLocation="CenterScreen"
         d:DesignHeight="430" d:DesignWidth="900" ShowMaxRestoreButton="False"
         WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
-        Icon="{Binding IconPath}"
         cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged];
                             [Event SizeChanged] = [Action WindowSizeChanged];
                             [Event StateChanged] = [Action WindowStateChanged];">
+
+    <mah:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <Grid Width="25"
+                  Height="25"
+                  Margin="1,1,0,1">
+                <Image Source="../Images/gtaIcon.ico"/>
+            </Grid>
+        </DataTemplate>
+    </mah:MetroWindow.IconTemplate>
 
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
@@ -128,7 +137,8 @@
 
                 <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" x:Name="ReadChangelog"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                        ToolTip="Read the changelog" Margin="315 0 0 0">
+                        ToolTip="Read the changelog" Margin="320 0 0 0">
+
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Kind="FileDocument" Height="11" Width="11" VerticalAlignment="Center"/>
 
@@ -138,7 +148,7 @@
 
                 <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" x:Name="UpdateProgramAsync"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                        Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="453 0 0 0">
+                        Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="458 0 0 0">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Kind="Download" Height="11" Width="11" VerticalAlignment="Center"/>
 
@@ -339,16 +349,31 @@
                     </ListView.View>
                 </ListView>
 
-                <StackPanel Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="3" Orientation="Horizontal"
-                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 2 0 0">
-                    <TextBlock Text="{Binding DownloadInfoText}" FontSize="14" FontWeight="Bold"
-                               TextAlignment="Center" VerticalAlignment="Center"/>
+                <Grid Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="3" 
+                      HorizontalAlignment="Center" Margin="0 4 0 0">
 
-                    <Button x:Name="StopDownload" Visibility="{Binding IsStopDownloadVisible}"
-                            ToolTip="Stop the current download" Margin="2 0 0 0">
-                        <iconPacks:PackIconMaterial Kind="StopCircleOutline" Height="12" Width="12"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <mah:MetroProgressBar Grid.Column="0" Grid.Row="0" Orientation="Horizontal"
+                                          Minimum="0" Value="{Binding ProgressBarValue}" Maximum="100" 
+                                          Visibility="{Binding IsProgressBarVisible}" Width="500"/>
+
+                    <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding DownloadInfoText}"
+                               FontSize="14" FontWeight="Bold" TextAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="1" Grid.Row="0" x:Name="StopDownload" 
+                            Visibility="{Binding IsStopDownloadVisible}" ToolTip="Stop the current download" Margin="5 0 0 0">
+                        <iconPacks:PackIconMaterial Kind="StopCircleOutline" Height="10" Width="10"/>
                     </Button>
-                </StackPanel>
+                </Grid>
             </Grid>
         </TabItem>
 
@@ -366,7 +391,8 @@
                     <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 
-                <ScrollViewer Grid.Column="1" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Column="1" Grid.Row="1" VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Auto">
                     <GroupBox>
                         <GroupBox.HeaderTemplate>
                             <DataTemplate>
@@ -381,7 +407,7 @@
                                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                         <iconPacks:PackIconMaterial Kind="Server"/>
 
-                                        <TextBlock Text="Servers" FontWeight="Bold" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                        <TextBlock Text="ArmA 3 Servers" FontWeight="Bold" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                     </StackPanel>
 
                                     <Button Grid.Column="1" cal:Message.Attach="[Event Click] = [Action ShowTeamSpeakSettings()]" Style="{DynamicResource MahApps.Styles.Button.Circle}"
@@ -576,15 +602,14 @@
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 2 0 0">
                                         <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">
-                                            <Image Source="{Binding IconPath}" Height="20" Width="20" 
-                                                   RenderTransformOrigin="0.5,0.5" />
+                                            <Image Source="../Images/gtaIcon.ico" Height="20" Width="20"/>
                                         </Button>
 
                                         <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="2 0 0 0">
                                             <iconPacks:PackIconMaterial Kind="FileMultiple"/>
                                         </Button>
 
-                                        <Button x:Name="ManualDownload" ToolTip="Manually download the app" Margin="2 0 0 0">
+                                        <Button x:Name="ManualDownload" ToolTip="Manually download the application" Margin="2 0 0 0">
                                             <StackPanel Orientation="Horizontal">
                                                 <iconPacks:PackIconMaterial Kind="ArrowTopRight" VerticalAlignment="Center"/>
                                             </StackPanel>
