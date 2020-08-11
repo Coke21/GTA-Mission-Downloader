@@ -23,6 +23,9 @@ namespace GTAMissionDownloader.Classes
         }
         private static async void NotifyIconBalloonTipClicked(bool stopOnStart, bool areFilesUpdated)
         {
+            if (_mvm.IsStopDownloadVisible == Visibility.Visible)
+                return;
+
             if (stopOnStart) 
                 StopNotification();
 

@@ -129,20 +129,18 @@ namespace GTAMissionDownloader.Classes
             var requestedFile = await Helper.GetFileRequest(fileId, "md5Checksum").ExecuteAsync();
 
             string filePath = Path.Combine(Properties.GetArma3MissionFolderPath, fileName);
-            string fileMd5Checksum = string.Empty;
-            try
-            {
-                fileMd5Checksum = CalculateMd5(filePath);
-            }
-            catch (FileNotFoundException)
-            {
+            string fileMd5Checksum = CalculateMd5(filePath);
+
+            if (string.IsNullOrWhiteSpace(fileMd5Checksum))
                 return "Missing";
-            }
 
             return Equals(requestedFile.Md5Checksum, fileMd5Checksum) ? "Updated" : "Outdated";
         }
         private static string CalculateMd5(string filePath)
         {
+            if (!File.Exists(filePath))
+                return string.Empty;
+
             using (var md5 = MD5.Create())
             using (var stream = File.OpenRead(filePath))
             {

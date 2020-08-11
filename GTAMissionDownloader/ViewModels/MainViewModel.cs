@@ -132,8 +132,6 @@ namespace GTAMissionDownloader.ViewModels
 
                 .Property(p => p.MissionItems, "Saved Mission File(s)")
                 .Property(p => p.MfColumnWidth, new GridLength(290, GridUnitType.Pixel), "GridSplitter Column Width")
-                //.Property(p => p.IsSubscribeAllChecked, false, "Subscribe All Toggle Button")
-
                 .Property(p => p.IgnoredItems, "Ignored Item(s)")
 
                 .Property(p => p.TsSelectorUrlText, "https://grandtheftarma.com/", "TeamSpeak Selector URL")
@@ -149,6 +147,7 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.IsTsChecked, false, "Run TS Automatically Checkbox")
                 .Property(p => p.IsAutomaticUpdateChecked, false, "Automatic Update Checkbox")
                 .Property(p => p.UpdateNotify, true, "Update Notify Checkbox")
+                .Property(p => p.IsDeleteIgnoredMfChecked, false, "Delete Ignored Mission File Checkbox")
 
                 .PersistOn(nameof(PropertyChanged));
 
@@ -162,8 +161,10 @@ namespace GTAMissionDownloader.ViewModels
                     IgnoredItems.Remove(item);
                     break;
                 }
+        }
 
-            #region OnStart
+        public void WindowLoaded()
+        {
             new Join(this, _tsViewModel);
 
             if (Accents.Count == 0)
@@ -201,7 +202,6 @@ namespace GTAMissionDownloader.ViewModels
 
             if (!IsAutomaticUpdateChecked)
                 _= Update.FilesCheckAsync(Helper.CtsOnStart.Token);
-            #endregion
         }
 
         public async Task CloseApp() => await TryCloseAsync();
@@ -344,7 +344,7 @@ namespace GTAMissionDownloader.ViewModels
 
             IsAutomaticUpdateEnabled = false;
 
-            foreach (var item in MissionItems)
+            foreach (var item in MissionItems.ToList())
                 if (item.IsSelected)
                     await Download.FileAsync(item.FileId, item, Helper.CtsStopDownloading.Token);
 
@@ -368,18 +368,6 @@ namespace GTAMissionDownloader.ViewModels
                     }
                 }
         }
-
-        //private bool _isSubscribeAllChecked;
-        //public bool IsSubscribeAllChecked
-        //{
-        //    get { return _isSubscribeAllChecked; }
-        //    set
-        //    {
-        //        _isSubscribeAllChecked = value;
-
-        //        NotifyOfPropertyChange(() => IsSubscribeAllChecked);
-        //    }
-        //}
 
         public void SubscribeAll()
         {
@@ -469,6 +457,16 @@ namespace GTAMissionDownloader.ViewModels
                 });
 
                 MissionItems.Remove(droppedItem);
+
+                if (IsDeleteIgnoredMfChecked)
+                    try
+                    {
+                        File.Delete(Properties.GetArma3MissionFolderPath + droppedItem.Mission);
+                    }
+                    catch (IOException e)
+                    {
+                        MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
             }
         }
         public void LvIgnoredSizeChanged(ListView listView)
@@ -1000,6 +998,18 @@ Server Query Port: {ServerQueryPortText}",
                 _updateNotify = value;
 
                 NotifyOfPropertyChange(() => UpdateNotify);
+            }
+        }
+
+        private bool _isDeleteIgnoredMfChecked;
+        public bool IsDeleteIgnoredMfChecked
+        {
+            get { return _isDeleteIgnoredMfChecked; }
+            set
+            {
+                _isDeleteIgnoredMfChecked = value; 
+
+                NotifyOfPropertyChange(() => IsDeleteIgnoredMfChecked);
             }
         }
 
