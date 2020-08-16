@@ -30,7 +30,6 @@ namespace GTAMissionDownloader.Classes
                 StopNotification();
 
             _mvm.WindowVisibility = Visibility.Visible;
-            _mvm.ShowInTaskbar = true;
 
             await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
                 new Action(delegate ()

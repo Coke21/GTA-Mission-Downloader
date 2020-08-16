@@ -11,7 +11,7 @@
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
         MinHeight="430" MinWidth="800" WindowStartupLocation="CenterScreen"
         d:DesignHeight="430" d:DesignWidth="900" ShowMaxRestoreButton="False"
-        WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}" ShowInTaskbar="{Binding ShowInTaskbar}"
+        WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}"
         cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged];
                             [Event SizeChanged] = [Action WindowSizeChanged];
                             [Event StateChanged] = [Action WindowStateChanged];
@@ -511,127 +511,127 @@
         <TabItem Header="Options">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="1" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="1" />
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="1" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <GroupBox>
-                        <GroupBox.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <iconPacks:PackIconMaterial Kind="Menu" />
+                <GroupBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <iconPacks:PackIconMaterial Kind="Menu" />
 
-                                    <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Options" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </GroupBox.HeaderTemplate>
+                                <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Options" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </GroupBox.HeaderTemplate>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="1" />
-                            </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1" />
+                        </Grid.ColumnDefinitions>
 
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                            <GroupBox Grid.Column="1" Grid.Row="0">
-                                <GroupBox.HeaderTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <iconPacks:PackIconMaterial Kind="ThemeLightDark" />
+                        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <StackPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Theme:" FontWeight="Bold" VerticalAlignment="Center"/>
 
-                                            <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="Theme and Accent" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GroupBox.HeaderTemplate>
-
-                                <StackPanel>
                                     <mah:ToggleSwitch IsOn="{Binding ThemeToggleSwitch}" OnContent="Light" OffContent="Dark" Width="90" 
                                                       HorizontalAlignment="Center"/>
+                                </DockPanel>
+
+                                <DockPanel>
+                                    <TextBlock Text="Accent:" FontWeight="Bold" VerticalAlignment="Center"/>
 
                                     <ComboBox x:Name="Accents" SelectedItem="{Binding SelectedAccent}" SelectedIndex="{Binding SelectedAccentIndex}"
-                                              DisplayMemberPath="ColorName"/>
+                                              Width="120" HorizontalAlignment="Center" DisplayMemberPath="ColorName"/>
+                                </DockPanel>
+
+                                <CheckBox Content="Start GTA Mission Downloader Automatically with Windows" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
+                                          ToolTip="Run the program automatically upon PC restart" Margin="0 5 0 0"/>
+
+                                <CheckBox Content="Hide the Program upon Start and when Minimised" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run and when minimised"
+                                          Margin="0 5 0 0"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                    <CheckBox Content="Join the Top Game Server upon Start" IsChecked="{Binding IsServerChecked}" ToolTip="Join the top Game Server automatically upon the program start"/>
+
+                                    <mah:NumericUpDown Value="{Binding DelayJoinValue, Mode=TwoWay}" Minimum="1" Maximum="60"
+                                                       IsEnabled="{Binding isDelayJoinEnabled}" NumericInputMode="Numbers" Width="70" 
+                                                       ToolTip="Specify (in seconds) when the program should try to automatically join the top game server (useful for waiting for Steam to launch)" Margin="5 0 0 0"/>
                                 </StackPanel>
-                            </GroupBox>
 
-                            <GroupBox Grid.Column="1" Grid.Row="1" Margin="0 2 0 0">
-                                <GroupBox.HeaderTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <iconPacks:PackIconMaterial Kind="Cog" />
+                                <CheckBox Content="Join the Top TeamSpeak Server and Specific Channel in TS Window" IsChecked="{Binding IsTsChecked}" ToolTip="Join the top TeamSpeak Server automatically upon the program start"
+                                          Margin="0 5 0 0"/>
 
-                                            <TextBlock Margin="2 0 0 0" VerticalAlignment="Center" Text="General" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GroupBox.HeaderTemplate>
+                                <CheckBox Content="Update Checked Mission Files in #Mission File Tab" IsChecked="{Binding IsAutomaticUpdateChecked}" IsEnabled="{Binding IsAutomaticUpdateEnabled}"
+                                          ToolTip="Automatically update the checked Mission Files" Margin="0 5 0 0"/>
 
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <CheckBox Content="Startup" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
-                                                  HorizontalAlignment="Center" ToolTip="Run the program automatically upon PC restart"/>
+                                <CheckBox Content="Notify when Program is outdated" IsChecked="{Binding UpdateNotify}" ToolTip="Notify when program is outdated"
+                                          Margin="0 5 0 0"/>
 
-                                        <CheckBox Content="Hidden" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run and when minimised"
-                                                  Margin="2 0 0 0"/>
+                                <CheckBox Content="Delete Mission File from your PC when moved to the Ignored List" IsChecked="{Binding IsDeleteIgnoredMfChecked}" ToolTip="Delete Mission File from your PC when moved to Ignored Items"
+                                          Margin="0 5 0 0"/>
+
+                            </StackPanel>
+
+                            <StackPanel VerticalAlignment="Center" Margin="5 7 0 0">
+                                <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="../Images/gtaIcon.ico" Height="30"/>
+
+                                        <TextBlock Text="Program Config Folder" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                     </StackPanel>
+                                </Button>
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 2 0 0">
-                                        <CheckBox Content="Server" IsChecked="{Binding IsServerChecked}" ToolTip="Join the top Game Server automatically upon the program start"/>
+                                <Button x:Name="ManualDownload" ToolTip="Manually download the Application"  Margin="0 5 0 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="Web" VerticalAlignment="Center"/>
 
-                                        <CheckBox Content="TS" IsChecked="{Binding IsTsChecked}" ToolTip="Run the top TeamSpeak automatically upon the program start"
-                                                  Margin="2 0 0 0"/>
+                                        <TextBlock Text="Manual Download" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                     </StackPanel>
+                                </Button>
 
-                                    <CheckBox Content="Automatic Update" IsChecked="{Binding IsAutomaticUpdateChecked}" IsEnabled="{Binding IsAutomaticUpdateEnabled}"
-                                              HorizontalAlignment="Center" ToolTip="Automatically updates the ticked mission files" Margin="0 2 0 0"/>
+                                <Button x:Name="BrowseMissionFiles" ToolTip="Browse through official Mission Files"  Margin="0 5 0 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="GoogleDrive" VerticalAlignment="Center"/>
 
-                                    <CheckBox Content="Update Notify" IsChecked="{Binding UpdateNotify}" HorizontalAlignment="Center"
-                                              ToolTip="Notify when program is outdated" Margin="0 2 0 0"/>
-
-                                    <CheckBox Content="Delete Ignored MF" IsChecked="{Binding IsDeleteIgnoredMfChecked}" HorizontalAlignment="Center"
-                                              ToolTip="Delete Mission File from your PC when moved to Ignored Items" Margin="0 2 0 0"/>
-
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 2 0 0">
-                                        <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">
-                                            <Image Source="../Images/gtaIcon.ico" Height="20" Width="20"/>
-                                        </Button>
-
-                                        <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="2 0 0 0">
-                                            <iconPacks:PackIconMaterial Kind="FileMultiple"/>
-                                        </Button>
-
-                                        <Button x:Name="ManualDownload" ToolTip="Manually download the application" Margin="2 0 0 0">
-                                            <StackPanel Orientation="Horizontal">
-                                                <iconPacks:PackIconMaterial Kind="ArrowTopRight" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Button>
+                                        <TextBlock Text="Mission Files" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                     </StackPanel>
+                                </Button>
 
-                                    <Button x:Name="BrowseOfficialThread" HorizontalAlignment="Center" ToolTip="Got any suggestions/feedback? Post it here"
-                                            Margin="0 2 0 0">
-                                        <StackPanel Orientation="Horizontal">
-                                            <iconPacks:PackIconMaterial Kind="FileDocument" VerticalAlignment="Center"/>
+                                <Button x:Name="BrowseOfficialThread" ToolTip="Got any suggestions/feedback? Post it here"  Margin="0 5 0 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="FileDocument" VerticalAlignment="Center"/>
 
-                                            <TextBlock Text="Thread" VerticalAlignment="Center" Margin="2 0 0 0"/>
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                            </GroupBox>
+                                        <TextBlock Text="Forum Thread" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                    </StackPanel>
+                                </Button>
 
-                        </Grid>
-                    </GroupBox>
-                </StackPanel>
+                                <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="0 5 0 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="../Images/arma3.png" Height="30"/>
+
+                                        <TextBlock Text="Mission File Folder" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
             </Grid>
         </TabItem>
     </TabControl>

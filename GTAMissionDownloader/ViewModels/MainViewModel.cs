@@ -74,19 +74,6 @@ namespace GTAMissionDownloader.ViewModels
             }
         }
 
-
-        private bool _showInTaskbar;
-        public bool ShowInTaskbar
-        {
-            get { return _showInTaskbar; }
-            set
-            {
-                _showInTaskbar = value;
-
-                NotifyOfPropertyChange(() => ShowInTaskbar);
-            }
-        }
-
         //Main window stuff
         public void WindowLocationChanged()
         {
@@ -99,11 +86,8 @@ namespace GTAMissionDownloader.ViewModels
         public void WindowStateChanged()
         {
             if (WindowState == WindowState.Minimized)
-                if (IsHiddenChecked && ShowInTaskbar)
-                {
-                    ShowInTaskbar = false;
+                if (IsHiddenChecked)
                     WindowVisibility = Visibility.Hidden;
-                }
         }
 
         //Constructor
@@ -111,7 +95,6 @@ namespace GTAMissionDownloader.ViewModels
         public MainViewModel()
         {
             WindowState = WindowState.Normal;
-            ShowInTaskbar = true;
             IsUpdateVisible = Visibility.Hidden;
             IsProgressBarVisible = Visibility.Hidden;
             IsStopDownloadVisible = Visibility.Hidden;
@@ -143,7 +126,10 @@ namespace GTAMissionDownloader.ViewModels
 
                 .Property(p => p.IsStartUpChecked, false, "StartUp Checkbox")
                 .Property(p => p.IsHiddenChecked, false, "Hide at Startup Checkbox")
+
                 .Property(p => p.IsServerChecked, false, "Join Game Server Automatically Checkbox")
+                .Property(p => p.DelayJoinValue, 10, "Delay Join Value (Seconds)")
+
                 .Property(p => p.IsTsChecked, false, "Run TS Automatically Checkbox")
                 .Property(p => p.IsAutomaticUpdateChecked, false, "Automatic Update Checkbox")
                 .Property(p => p.UpdateNotify, true, "Update Notify Checkbox")
@@ -163,7 +149,7 @@ namespace GTAMissionDownloader.ViewModels
                 }
         }
 
-        public void WindowLoaded()
+        public async Task WindowLoaded()
         {
             new Join(this, _tsViewModel);
 
@@ -171,23 +157,25 @@ namespace GTAMissionDownloader.ViewModels
                 foreach (var color in ThemeManager.Current.ColorSchemes)
                     Accents.Add(new AccentsModel() {ColorName = color});
 
-            if (IsHiddenChecked)
-            {
-                Helper.MyNotifyIcon.ShowBalloonTip("Reminder!", "The program is running in the background!", BalloonIcon.Info);
-                ShowInTaskbar = false;
-                WindowVisibility = Visibility.Hidden;
-            }
-
             if (IsServerChecked)
-                if (Process.GetProcessesByName("arma3_x64").Length == 0 && Process.GetProcessesByName("arma3").Length == 0 && Process.GetProcessesByName("arma3launcher").Length == 0)
-                    foreach (var server in Servers)
-                    {
-                        if (server.ContentButton == "Join TeamSpeak")
-                            continue;
+            {
+                await Task.Delay(DelayJoinValue * 1000);
 
-                        Join.Server(server);
-                        break;
-                    }
+                if (Process.GetProcessesByName("steam").Length != 0)
+                {
+                    if (Process.GetProcessesByName("arma3_x64").Length == 0 && Process.GetProcessesByName("arma3").Length == 0 && Process.GetProcessesByName("arma3launcher").Length == 0)
+                        foreach (var server in Servers)
+                        {
+                            if (server.ContentButton == "Join TeamSpeak")
+                                continue;
+
+                            Join.Server(server);
+                            break;
+                        }
+                }
+                else
+                    MessageBox.Show("GTA Mission Downloader could not find steam.exe running! Make sure to launch Steam first before this application.", "Join Game Server Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             if (IsTsChecked)
                 if (Process.GetProcessesByName("ts3client_win64").Length == 0)
@@ -202,6 +190,13 @@ namespace GTAMissionDownloader.ViewModels
 
             if (!IsAutomaticUpdateChecked)
                 _= Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+
+            //Must be at the end, to prevent black screen
+            if (IsHiddenChecked)
+            {
+                Helper.MyNotifyIcon.ShowBalloonTip("Reminder!", "The program is running in the background!", BalloonIcon.Info);
+                WindowVisibility = Visibility.Hidden;
+            }
         }
 
         public async Task CloseApp() => await TryCloseAsync();
@@ -914,10 +909,7 @@ Server Query Port: {ServerQueryPortText}",
                     IsStartUpEnabled = false;
                 }
                 else
-                {
                     IsStartUpEnabled = true;
-                    ShowInTaskbar = true;
-                }
 
                 NotifyOfPropertyChange(() => IsHiddenChecked);
             }
@@ -929,9 +921,35 @@ Server Query Port: {ServerQueryPortText}",
             get { return _isServerChecked; }
             set
             {
-                _isServerChecked = value; 
+                _isServerChecked = value;
+
+                isDelayJoinEnabled = IsServerChecked;
 
                 NotifyOfPropertyChange(() => IsServerChecked);
+            }
+        }
+
+        private int _delayJoinValue;
+        public int DelayJoinValue
+        {
+            get { return _delayJoinValue; }
+            set
+            {
+                _delayJoinValue = value; 
+
+                NotifyOfPropertyChange(() => DelayJoinValue);
+            }
+        }
+
+        private bool _isDelayJoinEnabled;
+        public bool isDelayJoinEnabled
+        {
+            get { return _isDelayJoinEnabled; }
+            set
+            {
+                _isDelayJoinEnabled = value;
+
+                NotifyOfPropertyChange(() => isDelayJoinEnabled);
             }
         }
 
@@ -1017,15 +1035,7 @@ Server Query Port: {ServerQueryPortText}",
         {
             Process.Start(new ProcessStartInfo()
             {
-                FileName = @Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/../Roaming/GTADownloader",
-                UseShellExecute = true
-            });
-        }
-        public void OpenMissionFileFolder()
-        {
-            Process.Start(new ProcessStartInfo()
-            {
-                FileName = Properties.GetArma3MissionFolderPath,
+                FileName = @Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/../Roaming/GTADownloader/GTADownloader",
                 UseShellExecute = true
             });
         }
@@ -1037,12 +1047,27 @@ Server Query Port: {ServerQueryPortText}",
                 UseShellExecute = true
             });
         }
-
+        public void BrowseMissionFiles()
+        {
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = $"https://drive.google.com/drive/u/3/folders/{Properties.FolderId}",
+                UseShellExecute = true
+            });
+        }
         public void BrowseOfficialThread()
         {
             Process.Start(new ProcessStartInfo()
             {
                 FileName = "https://grandtheftarma.com/topic/116196-gta-mission-downloader/",
+                UseShellExecute = true
+            });
+        }
+        public void OpenMissionFileFolder()
+        {
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = Properties.GetArma3MissionFolderPath,
                 UseShellExecute = true
             });
         }
