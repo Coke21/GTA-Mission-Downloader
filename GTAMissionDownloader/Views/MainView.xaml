@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="{Binding AppTitle, Mode=OneTime}" TitleCharacterCasing="Normal"
         Height="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-        MinHeight="430" MinWidth="800" WindowStartupLocation="CenterScreen"
+        MinHeight="350" MinWidth="800" WindowStartupLocation="CenterScreen"
         d:DesignHeight="430" d:DesignWidth="900" ShowMaxRestoreButton="False"
         WindowState="{Binding WindowState}" Visibility="{Binding WindowVisibility, Mode=TwoWay}"
         cal:Message.Attach="[Event LocationChanged] = [Action WindowLocationChanged];
@@ -112,7 +112,7 @@
                     <RowDefinition Height="1" />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="{Binding MfRowHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=0}" />
                     <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 

@@ -20,6 +20,7 @@ namespace GTAMissionDownloader.Classes
 
         public static async Task FileAsync(string fileId, MissionModel selectedItem, CancellationToken cancellationToken, string option = "missionFile")
         {
+            _mvm.MfRowHeight = new GridLength(0, GridUnitType.Auto);
             _mvm.IsProgressBarVisible = Visibility.Visible;
             _mvm.IsStopDownloadVisible = Visibility.Visible;
 
@@ -59,6 +60,7 @@ namespace GTAMissionDownloader.Classes
                                 selectedItem.IsModifiedTimeUpdated = "Outdated";
                             }
 
+                            _mvm.MfRowHeight = new GridLength(0);
                             _mvm.ProgressBarValue = 0;
                             _mvm.IsProgressBarVisible = Visibility.Hidden;
                             _mvm.DownloadInfoText = string.Empty;
@@ -74,6 +76,7 @@ namespace GTAMissionDownloader.Classes
                                 selectedItem.IsModifiedTimeUpdated = "Updated";
                             }
 
+                            _mvm.MfRowHeight = new GridLength(0);
                             _mvm.ProgressBarValue = 0;
                             _mvm.IsProgressBarVisible = Visibility.Hidden;
                             _mvm.DownloadInfoText = string.Empty;
@@ -90,6 +93,7 @@ namespace GTAMissionDownloader.Classes
                     return;
                 }
             }
+
             if (option == "programUpdate")
             {
                 Process.Start(new ProcessStartInfo()

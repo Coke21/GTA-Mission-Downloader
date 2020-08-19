@@ -96,6 +96,7 @@ namespace GTAMissionDownloader.ViewModels
         {
             WindowState = WindowState.Normal;
             IsUpdateVisible = Visibility.Hidden;
+            MfRowHeight = new GridLength(0);
             IsProgressBarVisible = Visibility.Hidden;
             IsStopDownloadVisible = Visibility.Hidden;
             IsAutomaticUpdateEnabled = true;
@@ -405,6 +406,19 @@ namespace GTAMissionDownloader.ViewModels
                 _mfColumnWidth = value;
 
                 NotifyOfPropertyChange(() => MfColumnWidth);
+            }
+        }
+
+        //Show/Hide Downloading Row
+        private GridLength _mfRowHeight;
+        public GridLength MfRowHeight
+        {
+            get { return _mfRowHeight; }
+            set
+            {
+                _mfRowHeight = value;
+
+                NotifyOfPropertyChange(() => MfRowHeight);
             }
         }
 
