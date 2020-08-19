@@ -566,16 +566,16 @@
                                 <CheckBox Content="Hide the Program upon Start and when Minimised" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run and when minimised"
                                           Margin="0 5 0 0"/>
 
-                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                <StackPanel Orientation="Horizontal" Margin="0 1 0 0">
                                     <CheckBox Content="Join the Top Game Server upon Start" IsChecked="{Binding IsServerChecked}" ToolTip="Join the top Game Server automatically upon the program start"/>
 
                                     <mah:NumericUpDown Value="{Binding DelayJoinValue, Mode=TwoWay}" Minimum="1" Maximum="60"
                                                        IsEnabled="{Binding isDelayJoinEnabled}" NumericInputMode="Numbers" Width="70" 
-                                                       ToolTip="Specify (in seconds) when the program should try to automatically join the top game server (useful for waiting for Steam to launch)" Margin="5 0 0 0"/>
+                                                       ToolTip="Specify the delay (in seconds) when the program should try to automatically join the top game server (useful for waiting for Steam to launch)" Margin="5 0 0 0"/>
                                 </StackPanel>
 
                                 <CheckBox Content="Join the Top TeamSpeak Server and Specific Channel in TS Window" IsChecked="{Binding IsTsChecked}" ToolTip="Join the top TeamSpeak Server automatically upon the program start"
-                                          Margin="0 5 0 0"/>
+                                          Margin="0 1 0 0"/>
 
                                 <CheckBox Content="Update Checked Mission Files in #Mission File Tab" IsChecked="{Binding IsAutomaticUpdateChecked}" IsEnabled="{Binding IsAutomaticUpdateEnabled}"
                                           ToolTip="Automatically update the checked Mission Files" Margin="0 5 0 0"/>
