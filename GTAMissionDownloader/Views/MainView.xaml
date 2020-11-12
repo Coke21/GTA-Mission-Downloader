@@ -304,7 +304,8 @@
                                               [Event MouseMove] = [Action LvIgnoredMouseMoveDragDrop($view)];
                                               [Event PreviewDrop] = [Action ItemDropLv($eventArgs)];
                                               [Event SizeChanged] = [Action LvIgnoredSizeChanged($source)];"
-                          AllowDrop="True" BorderThickness="1.000001" Margin="2 1 0 0">
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" AllowDrop="True" BorderThickness="1.000001"
+                          Margin="2 1 0 0">
 
                     <ListView.ItemContainerStyle>
                         <Style BasedOn="{StaticResource MahApps.Styles.ListViewItem}" TargetType="{x:Type ListViewItem}">
