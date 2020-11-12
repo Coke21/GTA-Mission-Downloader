@@ -4,7 +4,7 @@
   <b>UI:</b>
 </p>
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/44268275/96892705-314b6880-148a-11eb-9255-f2519d7ce7fc.png">
+  <img src="https://user-images.githubusercontent.com/44268275/98882072-c6d78800-248b-11eb-9ceb-6d7ba4371a9f.png">
 </p>
 
 ## Technologies Used:
