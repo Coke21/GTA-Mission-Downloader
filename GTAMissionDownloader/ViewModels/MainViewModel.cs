@@ -99,7 +99,6 @@ namespace GTAMissionDownloader.ViewModels
             MfRowHeight = new GridLength(0);
             IsProgressBarVisible = Visibility.Hidden;
             IsStopDownloadVisible = Visibility.Hidden;
-            IsAutomaticUpdateEnabled = true;
 
             new Download(this);
             new Notification(this);
@@ -115,6 +114,8 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.Width, 900, "Window Width")
 
                 .Property(p => p.MissionItems, "Saved Mission File(s)")
+                .Property(p => p.IsOrdered, false, "Specify if Server 1 mission file should appear first in the list (S1 mf will download first)")
+
                 .Property(p => p.MfColumnWidth, new GridLength(290, GridUnitType.Pixel), "GridSplitter Column Width")
                 .Property(p => p.IgnoredItems, "Ignored Item(s)")
 
@@ -128,11 +129,12 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.IsStartUpChecked, false, "StartUp Checkbox")
                 .Property(p => p.IsHiddenChecked, false, "Hide at Startup Checkbox")
 
+                .Property(p => p.IsRemoveMfsChecked, false, "Remove old files from the Ignored list if they are no longer available on GTA's Google Drive")
+
                 .Property(p => p.IsServerChecked, false, "Join Game Server Automatically Checkbox")
                 .Property(p => p.DelayJoinValue, 10, "Delay Join Value (Seconds)")
 
                 .Property(p => p.IsTsChecked, false, "Run TS Automatically Checkbox")
-                .Property(p => p.IsAutomaticUpdateChecked, false, "Automatic Update Checkbox")
                 .Property(p => p.UpdateNotify, true, "Update Notify Checkbox")
                 .Property(p => p.IsDeleteIgnoredMfChecked, false, "Delete Ignored Mission File Checkbox")
 
@@ -189,8 +191,7 @@ namespace GTAMissionDownloader.ViewModels
                         break;
                     }
 
-            if (!IsAutomaticUpdateChecked)
-                _= Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+            _ = Update.ItemsAsync();
 
             //Must be at the end, to prevent black screen
             if (IsHiddenChecked)
@@ -242,7 +243,7 @@ namespace GTAMissionDownloader.ViewModels
             });
         }
 
-        public async Task UpdateProgramAsync() => await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, "programUpdate");
+        public async Task UpdateProgramAsync() => await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, Download.Option.ProgramUpdate);
 
         private Visibility _isUpdateVisible;
         public Visibility IsUpdateVisible
@@ -258,6 +259,18 @@ namespace GTAMissionDownloader.ViewModels
 
         //Mfs ListView
         public BindableCollection<MissionModel> MissionItems { get; set; } = new BindableCollection<MissionModel>();
+
+        private bool _isOrdered;
+        public bool IsOrdered
+        {
+            get { return _isOrdered; }
+            set
+            {
+                _isOrdered = value;
+
+                NotifyOfPropertyChange(() => IsOrdered);
+            }
+        }
 
         private bool _isLvEnabled;
         public bool IsLvEnabled
@@ -303,7 +316,7 @@ namespace GTAMissionDownloader.ViewModels
             foreach (var droppedItem in droppedItems)
                 IgnoredItems.Remove(droppedItem);
 
-            await Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+            await Update.CheckFilesAsync(Helper.CtsOnStart.Token);
         }
         public void LvMfSizeChanged(ListView listView)
         {
@@ -326,9 +339,10 @@ namespace GTAMissionDownloader.ViewModels
 
         public async Task DownloadMission()
         {
-            if (IsAutomaticUpdateChecked)
+            var checkedItems = MissionItems.Where(ps => ps.IsChecked).ToList();
+            if (checkedItems.Any())
             {
-                MessageBox.Show("You cannot have the Automatic Update Checkbox (in Options) ticked! Untick the checkbox to manually download a file!", "Information", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                MessageBox.Show("If you want to manually download mission files, you have to untick any checked mission files!", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -338,13 +352,9 @@ namespace GTAMissionDownloader.ViewModels
                 return;
             }
 
-            IsAutomaticUpdateEnabled = false;
-
             foreach (var item in MissionItems.ToList())
                 if (item.IsSelected)
                     await Download.FileAsync(item.FileId, item, Helper.CtsStopDownloading.Token);
-
-            IsAutomaticUpdateEnabled = true;
         }
 
         public void DeleteMission()
@@ -365,6 +375,17 @@ namespace GTAMissionDownloader.ViewModels
                 }
         }
 
+        public void MissionHeaderClick()
+        {
+            if (MissionItems.Count == 0)
+                return;
+
+            MissionItems = new BindableCollection<MissionModel>(MissionItems.Reverse());
+            NotifyOfPropertyChange(() => MissionItems);
+
+            IsOrdered = !IsOrdered;
+        }
+
         public void SubscribeAll()
         {
             foreach (var mission in MissionItems)
@@ -377,23 +398,15 @@ namespace GTAMissionDownloader.ViewModels
                 mission.IsChecked = false;
         }
 
-        public void SubscribeUnChecked()
-        {
-            var checkedItems = MissionItems.Where(ps => ps.IsChecked).ToList();
-            if (!checkedItems.Any())
-                IsAutomaticUpdateChecked = false;
-        }
-
         public void InfoClick() => MessageBox.Show("These are the current colors and the meaning behind them in the list:\n" +
                                                               "Green - You have the updated version of the mission file.\n" +
                                                               "Red - You have the outdated version of the mission file.\n" +
                                                               "Orange - You don't have the mission file on your PC.\n\n" +
 
-                                                              "Subscription of the mission files:\n" +
+                                                              "Subscription of the mission files (to download them automatically):\n" +
                                                               "1.Choose the mission files that you want to observe.\n" +
-                                                              "2.Tick them.\n" +
-                                                              "3.Go to Options tab and tick the Automatic Update checkbox.\n\n" +
-                                                              
+                                                              "2.Tick them.\n\n" +
+
                                                               "If you want to ignore certain mission files, you just drag & drop them on the right list.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
 
         //GridSplitter
@@ -480,14 +493,13 @@ namespace GTAMissionDownloader.ViewModels
         }
         public void LvIgnoredSizeChanged(ListView listView)
         {
-            GridView gridView = listView.View as GridView;
-
             var workingWidth = listView.ActualWidth - 5;
             var col1 = 1;
 
             if (workingWidth < 0)
                 return;
 
+            var gridView = listView.View as GridView;
             gridView.Columns[0].Width = workingWidth * col1;
         }
 
@@ -497,7 +509,7 @@ namespace GTAMissionDownloader.ViewModels
                 if (item.IsSelected)
                     IgnoredItems.Remove(item);
 
-            await Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+            await Update.CheckFilesAsync(Helper.CtsOnStart.Token);
         }
 
         //Below ListViews
@@ -929,6 +941,18 @@ Server Query Port: {ServerQueryPortText}",
             }
         }
 
+        private bool _isRemoveMfsChecked;
+        public bool IsRemoveMfsChecked
+        {
+            get { return _isRemoveMfsChecked; }
+            set
+            {
+                _isRemoveMfsChecked = value; 
+
+                NotifyOfPropertyChange(() => IsRemoveMfsChecked);
+            }
+        }
+
         private bool _isServerChecked;
         public bool IsServerChecked
         {
@@ -976,48 +1000,6 @@ Server Query Port: {ServerQueryPortText}",
                 _isTsChecked = value;
 
                 NotifyOfPropertyChange(() => IsTsChecked);
-            }
-        }
-
-        private bool _isAutomaticUpdateChecked;
-        public bool IsAutomaticUpdateChecked
-        {
-            get { return _isAutomaticUpdateChecked; }
-            set
-            {
-                _isAutomaticUpdateChecked = value;
-
-                if (IsAutomaticUpdateChecked)
-                {
-                    var checkedItems = MissionItems.Where(ps => ps.IsChecked).ToList();
-                    if (!checkedItems.Any())
-                    {
-                        IsAutomaticUpdateChecked = false;
-                        return;
-                    }
-
-                    _ = Update.UpdateLvItemsCheckAsync(Helper.CtsStopDownloading.Token);
-                }
-                else
-                {
-                    Helper.CtsStopDownloading.Cancel();
-                    Helper.CtsStopDownloading.Dispose();
-                    Helper.CtsStopDownloading = new CancellationTokenSource();
-                }
-
-                NotifyOfPropertyChange(() => IsAutomaticUpdateChecked);
-            }
-        }
-
-        private bool _isAutomaticUpdateEnabled;
-        public bool IsAutomaticUpdateEnabled
-        {
-            get { return _isAutomaticUpdateEnabled; }
-            set
-            {
-                _isAutomaticUpdateEnabled = value; 
-
-                NotifyOfPropertyChange(() => IsAutomaticUpdateEnabled);
             }
         }
 

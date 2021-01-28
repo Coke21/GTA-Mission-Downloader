@@ -8,14 +8,14 @@ namespace GTAMissionDownloader.Classes
 {
     class Helper
     {
-        public static CancellationTokenSource CtsOnStart = new CancellationTokenSource();
-        public static CancellationTokenSource CtsStopDownloading = new CancellationTokenSource();
+        public static CancellationTokenSource CtsOnStart { get; set; } = new CancellationTokenSource();
+        public static CancellationTokenSource CtsStopDownloading { get; set; } = new CancellationTokenSource();
 
-        public static TaskbarIcon MyNotifyIcon = new TaskbarIcon();
+        public static TaskbarIcon MyNotifyIcon { get; set; } = new TaskbarIcon();
 
-        public static DriveService Service = new DriveService(new BaseClientService.Initializer()
+        public static DriveService Service { get; set; } = new DriveService(new BaseClientService.Initializer()
         {
-            ApiKey = "AIzaSyB8KixGHl2SPwQ5HJixKGm7IGbOYbpuc1w"
+            ApiKey = "YourApiKey"
         });
 
         public static FilesResource.GetRequest GetFileRequest(string fileId, string field)
@@ -26,6 +26,6 @@ namespace GTAMissionDownloader.Classes
             return request;
         }
 
-        public static IWindowManager Manager = new WindowManager();
+        public static IWindowManager Manager { get; set; } = new WindowManager();
     }
 }

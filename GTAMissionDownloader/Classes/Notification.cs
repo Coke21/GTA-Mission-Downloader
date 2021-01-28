@@ -40,7 +40,7 @@ namespace GTAMissionDownloader.Classes
             try
             {
                 if (areFilesUpdated)
-                    await Update.FilesCheckAsync(Helper.CtsOnStart.Token);
+                    await Update.CheckFilesAsync(Helper.CtsOnStart.Token);
             }
             catch (IOException)
             {

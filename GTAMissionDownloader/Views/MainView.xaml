@@ -204,7 +204,9 @@
                                 </Style>
                             </GridView.ColumnHeaderContainerStyle>
 
-                            <GridViewColumn Header="Mission File:">
+                            <GridViewColumn>
+                                <GridViewColumnHeader Content="Mission File:" cal:Message.Attach="[Event Click] = [Action MissionHeaderClick];"
+                                                      ToolTip="Shows the name of the mission file; this header can be clicked to reorder the mission files"/>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Mission}">
@@ -257,7 +259,7 @@
                                 <GridViewColumn.HeaderTemplate>
                                     <DataTemplate>
                                         <DockPanel>
-                                            <TextBlock Text="Subscribe?" ToolTip="Add the selected Mission file(s) to the queue"/>
+                                            <TextBlock Text="Subscribe?" ToolTip="Add the selected Mission file(s) to the downloading queue"/>
 
                                             <ToggleButton cal:Message.Attach="[Event Checked] = [Action SubscribeAll];
                                                                               [Event Unchecked] = [Action UnSubscribeAll];" 
@@ -271,7 +273,7 @@
 
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsChecked}" cal:Message.Attach="[Event Unchecked] = [Action SubscribeUnChecked];"/>
+                                        <CheckBox IsChecked="{Binding IsChecked}"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -564,28 +566,29 @@
                                 <CheckBox Content="Start GTA Mission Downloader Automatically with Windows" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
                                           ToolTip="Run the program automatically upon PC restart" Margin="0 5 0 0"/>
 
-                                <CheckBox Content="Hide the Program upon Start and when Minimised" IsChecked="{Binding IsHiddenChecked}" ToolTip="Hide the program upon run and when minimised"
-                                          Margin="0 5 0 0"/>
+                                <CheckBox Content="Hide the Program upon Start and when Minimised" IsChecked="{Binding IsHiddenChecked}" 
+                                          ToolTip="Hide the program upon run and when minimised" Margin="0 5 0 0"/>
+
+                                <CheckBox Content="Remove Mission files from Ignored list if they are no longer available" IsChecked="{Binding IsRemoveMfsChecked}" 
+                                          ToolTip="Remove Mission files from the Ignored list and your PC if they are no longer available on GTA's Google Drive" Margin="0 5 0 0"/>
 
                                 <StackPanel Orientation="Horizontal" Margin="0 1 0 0">
-                                    <CheckBox Content="Join the Top Game Server upon Start" IsChecked="{Binding IsServerChecked}" ToolTip="Join the top Game Server automatically upon the program start"/>
+                                    <CheckBox Content="Join the Top Game Server upon Start" IsChecked="{Binding IsServerChecked}" 
+                                              ToolTip="Join the top Game Server automatically upon the program start"/>
 
                                     <mah:NumericUpDown Value="{Binding DelayJoinValue, Mode=TwoWay}" Minimum="1" Maximum="60"
                                                        IsEnabled="{Binding isDelayJoinEnabled}" NumericInputMode="Numbers" Width="70" 
                                                        ToolTip="Specify the delay (in seconds) when the program should try to automatically join the top game server (useful for waiting for Steam to launch)" Margin="5 0 0 0"/>
                                 </StackPanel>
 
-                                <CheckBox Content="Join the Top TeamSpeak Server and Specific Channel in TS Window" IsChecked="{Binding IsTsChecked}" ToolTip="Join the top TeamSpeak Server automatically upon the program start"
-                                          Margin="0 1 0 0"/>
+                                <CheckBox Content="Join the Top TeamSpeak Server and Specific Channel in TS Window" IsChecked="{Binding IsTsChecked}" 
+                                          ToolTip="Join the top TeamSpeak Server automatically upon the program start" Margin="0 1 0 0"/>
 
-                                <CheckBox Content="Update Checked Mission Files in #Mission File Tab" IsChecked="{Binding IsAutomaticUpdateChecked}" IsEnabled="{Binding IsAutomaticUpdateEnabled}"
-                                          ToolTip="Automatically update the checked Mission Files" Margin="0 5 0 0"/>
+                                <CheckBox Content="Notify when Program is outdated" IsChecked="{Binding UpdateNotify}" 
+                                          ToolTip="Notify when program is outdated" Margin="0 5 0 0"/>
 
-                                <CheckBox Content="Notify when Program is outdated" IsChecked="{Binding UpdateNotify}" ToolTip="Notify when program is outdated"
-                                          Margin="0 5 0 0"/>
-
-                                <CheckBox Content="Delete Mission File from your PC when moved to the Ignored List" IsChecked="{Binding IsDeleteIgnoredMfChecked}" ToolTip="Delete Mission File from your PC when moved to Ignored Items"
-                                          Margin="0 5 0 0"/>
+                                <CheckBox Content="Delete Mission File from your PC when moved to the Ignored List" IsChecked="{Binding IsDeleteIgnoredMfChecked}" 
+                                          ToolTip="Delete Mission File from your PC when moved to Ignored Items" Margin="0 5 0 0"/>
 
                             </StackPanel>
 

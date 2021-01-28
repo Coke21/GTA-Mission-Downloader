@@ -18,7 +18,13 @@ namespace GTAMissionDownloader.Classes
             _mvm = mvm;
         }
 
-        public static async Task FileAsync(string fileId, MissionModel selectedItem, CancellationToken cancellationToken, string option = "missionFile")
+        public enum Option
+        {
+            ProgramUpdate = 0,
+            MissionFile = 1
+        }
+
+        public static async Task FileAsync(string fileId, MissionModel selectedItem, CancellationToken cancellationToken, Option option = Option.MissionFile)
         {
             _mvm.MfRowHeight = new GridLength(0, GridUnitType.Auto);
             _mvm.IsProgressBarVisible = Visibility.Visible;
@@ -31,14 +37,14 @@ namespace GTAMissionDownloader.Classes
 
             string mFPath = Path.Combine(Properties.GetArma3MissionFolderPath, requestedFile.Name);
             string programPath = string.Empty;
-            if (option == "programUpdate")
+            if (option == Option.ProgramUpdate)
             {
                 File.Move(Process.GetCurrentProcess().MainModule.FileName, Process.GetCurrentProcess().MainModule.FileName + "OLD.exe");
                 programPath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), requestedFile.Name + ".exe");
             }
 
             await using (MemoryStream stream = new MemoryStream())
-            await using (FileStream file = new FileStream(option == "missionFile" ? mFPath : programPath, FileMode.Create, FileAccess.Write))
+            await using (FileStream file = new FileStream(option == Option.MissionFile ? mFPath : programPath, FileMode.Create, FileAccess.Write))
             {
                 request.MediaDownloader.ProgressChanged += progress =>
                 {
@@ -94,7 +100,7 @@ namespace GTAMissionDownloader.Classes
                 }
             }
 
-            if (option == "programUpdate")
+            if (option == Option.ProgramUpdate)
             {
                 Process.Start(new ProcessStartInfo()
                 {
