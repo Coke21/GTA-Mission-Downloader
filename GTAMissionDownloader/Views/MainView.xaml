@@ -583,7 +583,7 @@
                             </TabItem>
 
                             <TabItem Header="General">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="6 0 0 0">
                                     <StackPanel>
                                         <DockPanel>
                                             <TextBlock Text="Theme:" FontWeight="Bold" VerticalAlignment="Center"/>
