@@ -525,7 +525,7 @@
                     <RowDefinition Height="1" />
                 </Grid.RowDefinitions>
 
-                <GroupBox Grid.Column="1" Grid.Row="1" Height="240" Width="650"
+                <GroupBox Grid.Column="1" Grid.Row="1" Height="240" Width="660"
                           HorizontalAlignment="Center" VerticalAlignment="Center">
                     <GroupBox.HeaderTemplate>
                         <DataTemplate>
@@ -548,7 +548,8 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TabControl Grid.Column="1" Grid.Row="0" TabStripPlacement="Left">
+                        <TabControl Grid.Column="1" Grid.Row="0" TabStripPlacement="Left" mah:TabControlHelper.Underlined="TabItems"
+                                    Style="{DynamicResource MahApps.Styles.TabControl.Animated}">
                             <TabItem Header="Mission File">
                                 <StackPanel HorizontalAlignment="Center">
                                     <CheckBox Content="Delete Mission File from your PC when moved to the Ignored List" IsChecked="{Binding IsDeleteIgnoredMfChecked}" 
