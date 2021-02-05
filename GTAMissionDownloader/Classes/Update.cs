@@ -27,7 +27,19 @@ namespace GTAMissionDownloader.Classes
             listRequest.OrderBy = "name";
             listRequest.Fields = "files(id, name, modifiedTime)";
             listRequest.Q = $"'{Properties.FolderId}' in parents";
-            var files = await listRequest.ExecuteAsync();
+
+            Google.Apis.Drive.v3.Data.FileList files = null;
+            try
+            {
+                files = await listRequest.ExecuteAsync();
+            }
+            catch (Exception e)
+            {
+                if (_mvm.IsHideExceptionMissionChecked == false)
+                    MessageBox.Show($"An Exception was thrown: {e.Message}\nIt was thrown while trying to connect to the Google servers!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             files.Files.Remove(files.Files.SingleOrDefault(r => r.Name == "readme.txt"));
 
             if (_mvm.IsRemoveMfsChecked)
@@ -128,7 +140,7 @@ namespace GTAMissionDownloader.Classes
 
                 _mvm.IsUpdateVisible = Visibility.Visible;
 
-                if (_mvm.UpdateNotify)
+                if (_mvm.IsUpdateNotifyChecked)
                 {
                     var result = System.Windows.Forms.MessageBox.Show("A new update for GTA program has been detected. Download it?", "Update", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Information);
 

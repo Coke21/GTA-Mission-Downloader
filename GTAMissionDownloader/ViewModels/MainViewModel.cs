@@ -122,21 +122,21 @@ namespace GTAMissionDownloader.ViewModels
                 .Property(p => p.TsSelectorUrlText, "https://grandtheftarma.com/", "TeamSpeak Selector URL")
                 .Property(p => p.Servers, "Saved Servers")
 
-                .Property(p => p.ThemeToggleSwitch, false, "Theme")
-                .Property(p => p.Accents, "Accent Items")
-                .Property(p => p.SelectedAccentIndex, 1, "Selected Accent")
-
-                .Property(p => p.IsStartUpChecked, false, "StartUp Checkbox")
-                .Property(p => p.IsHiddenChecked, false, "Hide at Startup Checkbox")
-
-                .Property(p => p.IsRemoveMfsChecked, false, "Remove old files from the Ignored list if they are no longer available on GTA's Google Drive")
+                .Property(p => p.IsDeleteIgnoredMfChecked, false, "Delete Ignored Mission File Checkbox")
+                .Property(p => p.IsRemoveMfsChecked, false, "Remove old files from the Ignored list if they are no longer available on GTA's Google Drive Checkbox")
+                .Property(p => p.IsHideExceptionMissionChecked, false, "Hide any exception messages in Mission tab Checkbox")
 
                 .Property(p => p.IsServerChecked, false, "Join Game Server Automatically Checkbox")
                 .Property(p => p.DelayJoinValue, 10, "Delay Join Value (Seconds)")
-
                 .Property(p => p.IsTsChecked, false, "Run TS Automatically Checkbox")
-                .Property(p => p.UpdateNotify, true, "Update Notify Checkbox")
-                .Property(p => p.IsDeleteIgnoredMfChecked, false, "Delete Ignored Mission File Checkbox")
+                .Property(p => p.IsHideExceptionServerChecked, false, "Hide any exception messages in Servers tab Checkbox")
+
+                .Property(p => p.ThemeToggleSwitch, false, "Theme")
+                .Property(p => p.Accents, "Accent Items")
+                .Property(p => p.SelectedAccentIndex, 1, "Selected Accent")
+                .Property(p => p.IsStartUpChecked, false, "StartUp Checkbox")
+                .Property(p => p.IsHiddenChecked, false, "Hide at Startup Checkbox")
+                .Property(p => p.IsUpdateNotifyChecked, true, "Notify when Program is outdated Checkbox")
 
                 .PersistOn(nameof(PropertyChanged));
 
@@ -837,6 +837,104 @@ Server Query Port: {ServerQueryPortText}",
         }
 
         //Options tab
+        private bool _isDeleteIgnoredMfChecked;
+        public bool IsDeleteIgnoredMfChecked
+        {
+            get { return _isDeleteIgnoredMfChecked; }
+            set
+            {
+                _isDeleteIgnoredMfChecked = value;
+
+                NotifyOfPropertyChange(() => IsDeleteIgnoredMfChecked);
+            }
+        }
+
+        private bool _isRemoveMfsChecked;
+        public bool IsRemoveMfsChecked
+        {
+            get { return _isRemoveMfsChecked; }
+            set
+            {
+                _isRemoveMfsChecked = value;
+
+                NotifyOfPropertyChange(() => IsRemoveMfsChecked);
+            }
+        }
+
+        private bool _isHideExceptionMissionChecked;
+        public bool IsHideExceptionMissionChecked
+        {
+            get { return _isHideExceptionMissionChecked; }
+            set
+            {
+                _isHideExceptionMissionChecked = value;
+
+                NotifyOfPropertyChange(() => IsHideExceptionMissionChecked);
+            }
+        }
+
+        private bool _isServerChecked;
+        public bool IsServerChecked
+        {
+            get { return _isServerChecked; }
+            set
+            {
+                _isServerChecked = value;
+
+                isDelayJoinEnabled = IsServerChecked;
+
+                NotifyOfPropertyChange(() => IsServerChecked);
+            }
+        }
+
+        private int _delayJoinValue;
+        public int DelayJoinValue
+        {
+            get { return _delayJoinValue; }
+            set
+            {
+                _delayJoinValue = value;
+
+                NotifyOfPropertyChange(() => DelayJoinValue);
+            }
+        }
+
+        private bool _isDelayJoinEnabled;
+        public bool isDelayJoinEnabled
+        {
+            get { return _isDelayJoinEnabled; }
+            set
+            {
+                _isDelayJoinEnabled = value;
+
+                NotifyOfPropertyChange(() => isDelayJoinEnabled);
+            }
+        }
+
+        private bool _isTsChecked;
+        public bool IsTsChecked
+        {
+            get { return _isTsChecked; }
+            set
+            {
+                _isTsChecked = value;
+
+                NotifyOfPropertyChange(() => IsTsChecked);
+            }
+        }
+
+        private bool _isHideExceptionServerChecked;
+        public bool IsHideExceptionServerChecked
+        {
+            get { return _isHideExceptionServerChecked; }
+            set
+            {
+                _isHideExceptionServerChecked = value;
+
+                NotifyOfPropertyChange(() => IsHideExceptionServerChecked);
+            }
+        }
+
         private bool _themeToggleSwitch;
         public bool ThemeToggleSwitch
         {
@@ -941,89 +1039,15 @@ Server Query Port: {ServerQueryPortText}",
             }
         }
 
-        private bool _isRemoveMfsChecked;
-        public bool IsRemoveMfsChecked
+        private bool _isUpdateNotifyChecked;
+        public bool IsUpdateNotifyChecked
         {
-            get { return _isRemoveMfsChecked; }
+            get { return _isUpdateNotifyChecked; }
             set
             {
-                _isRemoveMfsChecked = value; 
+                _isUpdateNotifyChecked = value;
 
-                NotifyOfPropertyChange(() => IsRemoveMfsChecked);
-            }
-        }
-
-        private bool _isServerChecked;
-        public bool IsServerChecked
-        {
-            get { return _isServerChecked; }
-            set
-            {
-                _isServerChecked = value;
-
-                isDelayJoinEnabled = IsServerChecked;
-
-                NotifyOfPropertyChange(() => IsServerChecked);
-            }
-        }
-
-        private int _delayJoinValue;
-        public int DelayJoinValue
-        {
-            get { return _delayJoinValue; }
-            set
-            {
-                _delayJoinValue = value; 
-
-                NotifyOfPropertyChange(() => DelayJoinValue);
-            }
-        }
-
-        private bool _isDelayJoinEnabled;
-        public bool isDelayJoinEnabled
-        {
-            get { return _isDelayJoinEnabled; }
-            set
-            {
-                _isDelayJoinEnabled = value;
-
-                NotifyOfPropertyChange(() => isDelayJoinEnabled);
-            }
-        }
-
-        private bool _isTsChecked;
-        public bool IsTsChecked
-        {
-            get { return _isTsChecked; }
-            set
-            {
-                _isTsChecked = value;
-
-                NotifyOfPropertyChange(() => IsTsChecked);
-            }
-        }
-
-        private bool _updateNotify;
-        public bool UpdateNotify
-        {
-            get { return _updateNotify; }
-            set
-            {
-                _updateNotify = value;
-
-                NotifyOfPropertyChange(() => UpdateNotify);
-            }
-        }
-
-        private bool _isDeleteIgnoredMfChecked;
-        public bool IsDeleteIgnoredMfChecked
-        {
-            get { return _isDeleteIgnoredMfChecked; }
-            set
-            {
-                _isDeleteIgnoredMfChecked = value; 
-
-                NotifyOfPropertyChange(() => IsDeleteIgnoredMfChecked);
+                NotifyOfPropertyChange(() => IsUpdateNotifyChecked);
             }
         }
 

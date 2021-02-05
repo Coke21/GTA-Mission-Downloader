@@ -110,7 +110,8 @@ namespace GTAMissionDownloader.Classes
                         }
                         catch (Exception e)
                         {
-                            MessageBox.Show($"Exception raised: {e.Message}\n->{serverModel.ServerIp}:{serverModel.ServerQueryPort} is wrong!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            if (_mvm.IsHideExceptionServerChecked == false)
+                                MessageBox.Show($"An Exception raised: {e.Message}\nThe exception was thrown in: {serverModel.ServerIp}:{serverModel.ServerQueryPort}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                     await Task.Delay(5_000);
