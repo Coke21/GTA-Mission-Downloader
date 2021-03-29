@@ -1,11 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using GTAMissionDownloader.ViewModels;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace GTAMissionDownloader.Classes
 {
@@ -30,17 +30,16 @@ namespace GTAMissionDownloader.Classes
                 StopNotification();
 
             _mvm.WindowVisibility = Visibility.Visible;
-
-            await Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
-                new Action(delegate ()
-                {
-                    _mvm.WindowState = WindowState.Normal;
-                }));
+            await Application.Current.Dispatcher.BeginInvoke(() => _mvm.WindowState = WindowState.Normal);
 
             try
             {
                 if (areFilesUpdated)
+                {
+                    await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.Indeterminate));
                     await Update.CheckFilesAsync(Helper.CtsOnStart.Token);
+                    await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress));
+                }
             }
             catch (IOException)
             {

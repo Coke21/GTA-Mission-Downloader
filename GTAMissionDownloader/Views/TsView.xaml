@@ -83,7 +83,6 @@
                     </GridView.ColumnHeaderContainerStyle>
 
                     <GridViewColumn Header="Channel Paths:">
-
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding ChannelPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" TextWrapping="Wrap"
@@ -93,7 +92,6 @@
                     </GridViewColumn>
 
                     <GridViewColumn Header="Passwords:">
-
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding ChannelPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" TextWrapping="Wrap"

@@ -110,7 +110,7 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1" />
-                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="{Binding MfRowHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=0}" />
                     <RowDefinition Height="1" />
@@ -138,7 +138,7 @@
 
                 <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" x:Name="ReadChangelog"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                        ToolTip="Read the changelog" Margin="320 0 0 0">
+                        ToolTip="Read the changelog" Margin="325 0 0 0">
 
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Kind="FileDocument" Height="11" Width="11" VerticalAlignment="Center"/>
@@ -149,7 +149,7 @@
 
                 <Button Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1" x:Name="UpdateProgramAsync"
                         HorizontalAlignment="Center" VerticalAlignment="Top"
-                        Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="458 0 0 0">
+                        Visibility="{Binding IsUpdateVisible}" ToolTip="Update the program" Margin="465 0 0 0">
                     <StackPanel Orientation="Horizontal">
                         <iconPacks:PackIconMaterial Kind="Download" Height="11" Width="11" VerticalAlignment="Center"/>
 
@@ -163,7 +163,7 @@
                                               [Event MouseMove] = [Action LvMouseMoveDragDrop($view)];
                                               [Event PreviewDrop] = [Action MissionDropLv($eventArgs)];
                                               [Event SizeChanged] = [Action LvMfSizeChanged($source)];"
-                          BorderThickness="1.000001" Margin="0 1 0 0">
+                          BorderThickness="1.000001" Margin="0 5 0 0">
 
                     <ListView.ItemContainerStyle>
                         <Style BasedOn="{StaticResource MahApps.Styles.ListViewItem}" TargetType="{x:Type ListViewItem}">
@@ -299,7 +299,7 @@
                 </ListView>
 
                 <GridSplitter Grid.Column="2" Grid.Row="2" Width="5" ShowsPreview="False"
-                              Margin="2 0 0 0"/>
+                              Margin="2 5 0 0"/>
 
                 <ListView Grid.Column="3" Grid.Row="2" ItemsSource="{Binding IgnoredItems}" 
                           cal:Message.Attach="[Event MouseDown] = [Action IgnoreLvMouseDown($view, $mousepoint)];
@@ -307,7 +307,7 @@
                                               [Event PreviewDrop] = [Action ItemDropLv($eventArgs)];
                                               [Event SizeChanged] = [Action LvIgnoredSizeChanged($source)];"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled" AllowDrop="True" BorderThickness="1.000001"
-                          Margin="2 1 0 0">
+                          Margin="2 5 0 0">
 
                     <ListView.ItemContainerStyle>
                         <Style BasedOn="{StaticResource MahApps.Styles.ListViewItem}" TargetType="{x:Type ListViewItem}">
@@ -552,10 +552,10 @@
                                     Style="{DynamicResource MahApps.Styles.TabControl.Animated}">
                             <TabItem Header="Mission File">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <CheckBox Content="Delete Mission File from your PC when moved to the Ignored List" IsChecked="{Binding IsDeleteIgnoredMfChecked}" 
-                                              ToolTip="Delete Mission File from your PC when moved to the Ignored List"/>
+                                    <CheckBox Content="Delete Mission File from your PC when moved to the Ignored list" IsChecked="{Binding IsDeleteIgnoredMfChecked}" 
+                                              ToolTip="Delete Mission File from your PC when moved to the Ignored list"/>
 
-                                    <CheckBox Content="Remove Mission files from Ignored list if they are no longer available" IsChecked="{Binding IsRemoveMfsChecked}" 
+                                    <CheckBox Content="Remove Mission files from the Ignored list if they are no longer available" IsChecked="{Binding IsRemoveMfsChecked}" 
                                               ToolTip="Remove Mission files from the Ignored list and your PC if they are no longer available on GTA's Google Drive" Margin="0 5 0 0"/>
 
                                     <CheckBox Content="Hide any exception messages in Mission tab" IsChecked="{Binding IsHideExceptionMissionChecked}"
@@ -566,16 +566,16 @@
                             <TabItem Header="Servers">
                                 <StackPanel HorizontalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
-                                        <CheckBox Content="Join the Top Game Server upon Start" IsChecked="{Binding IsServerChecked}" 
-                                                  ToolTip="Join the top Game Server automatically upon the program start"/>
+                                        <CheckBox Content="Join the top game server upon start" IsChecked="{Binding IsServerChecked}" 
+                                                  ToolTip="Join the top game server automatically upon the program start"/>
 
                                         <mah:NumericUpDown Value="{Binding DelayJoinValue, Mode=TwoWay}" Minimum="1" Maximum="60"
                                                            IsEnabled="{Binding isDelayJoinEnabled}" NumericInputMode="Numbers" Width="70" 
                                                            ToolTip="Specify the delay (in seconds) when the program should try to automatically join the top game server (useful for waiting for Steam to launch)" Margin="5 0 0 0"/>
                                     </StackPanel>
 
-                                    <CheckBox Content="Join the Top TeamSpeak Server and Specific Channel in TS Window" IsChecked="{Binding IsTsChecked}" 
-                                              ToolTip="Join the top TeamSpeak Server automatically upon the program start" Margin="0 1 0 0"/>
+                                    <CheckBox Content="Join the top TeamSpeak server and specific channel in TS Window" IsChecked="{Binding IsTsChecked}" 
+                                              ToolTip="Join the top TeamSpeak server automatically upon the program start" Margin="0 1 0 0"/>
 
                                     <CheckBox Content="Hide any exception messages in Servers tab" IsChecked="{Binding IsHideExceptionServerChecked}"
                                               ToolTip="Warning! This will hide any exception messages in Servers tab" Margin="0 5 0 0"/>
@@ -583,13 +583,13 @@
                             </TabItem>
 
                             <TabItem Header="General">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="6 0 0 0">
-                                    <StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <StackPanel VerticalAlignment="Center">
                                         <DockPanel>
                                             <TextBlock Text="Theme:" FontWeight="Bold" VerticalAlignment="Center"/>
 
                                             <mah:ToggleSwitch IsOn="{Binding ThemeToggleSwitch}" OnContent="Light" OffContent="Dark" Width="90" 
-                                                          HorizontalAlignment="Center"/>
+                                                          HorizontalAlignment="Center" Margin="35 0 0 0"/>
                                         </DockPanel>
 
                                         <DockPanel>
@@ -599,26 +599,26 @@
                                                   Width="120" HorizontalAlignment="Center" DisplayMemberPath="ColorName"/>
                                         </DockPanel>
 
-                                        <CheckBox Content="Start GTA Mission Downloader Automatically with Windows" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
-                                              ToolTip="Run the program automatically upon PC restart" Margin="0 5 0 0"/>
+                                        <CheckBox Content="Start GTA Mission Downloader automatically with Windows" IsChecked="{Binding IsStartUpChecked}" IsEnabled="{Binding IsStartUpEnabled}" 
+                                                  ToolTip="Run the program automatically upon PC restart" Margin="0 10 0 0"/>
 
-                                        <CheckBox Content="Hide the Program upon Start and when Minimised" IsChecked="{Binding IsHiddenChecked}" 
-                                              ToolTip="Hide the program upon run and when minimised" Margin="0 5 0 0"/>
+                                        <CheckBox Content="Hide the program upon start and when minimised" IsChecked="{Binding IsHiddenChecked}" 
+                                                  ToolTip="Hide the program upon run and when minimised" Margin="0 5 0 0"/>
 
-                                        <CheckBox Content="Notify when Program is outdated" IsChecked="{Binding IsUpdateNotifyChecked}" 
-                                              ToolTip="Notify when program is outdated" Margin="0 5 0 0"/>
+                                        <CheckBox Content="Notify when program is outdated" IsChecked="{Binding IsUpdateNotifyChecked}" 
+                                                  ToolTip="Notify when program is outdated" Margin="0 5 0 0"/>
                                     </StackPanel>
 
-                                    <StackPanel Margin="5 0 0 0">
+                                    <StackPanel VerticalAlignment="Center" Margin="10 0 0 0">
                                         <Button x:Name="OpenConfigFolder" ToolTip="Open the Config folder">
                                             <StackPanel Orientation="Horizontal">
                                                 <Image Source="../Images/gtaIcon.ico" Height="30"/>
 
-                                                <TextBlock Text="Program Config Folder" VerticalAlignment="Center" Margin="2 0 0 0"/>
+                                                <TextBlock Text="Config folder" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                             </StackPanel>
                                         </Button>
 
-                                        <Button x:Name="ManualDownload" ToolTip="Manually download the Application"  Margin="0 5 0 0">
+                                        <Button x:Name="ManualDownload" ToolTip="Manually download the application"  Margin="0 5 0 0">
                                             <StackPanel Orientation="Horizontal">
                                                 <iconPacks:PackIconMaterial Kind="Web" VerticalAlignment="Center"/>
 
@@ -636,7 +636,7 @@
 
                                         <Button x:Name="BrowseOfficialThread" ToolTip="Got any suggestions/feedback? Post it here"  Margin="0 5 0 0">
                                             <StackPanel Orientation="Horizontal">
-                                                <iconPacks:PackIconMaterial Kind="FileDocument" VerticalAlignment="Center"/>
+                                                <iconPacks:PackIconMaterial Kind="Forum" VerticalAlignment="Center"/>
 
                                                 <TextBlock Text="Forum Thread" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                             </StackPanel>
@@ -644,7 +644,7 @@
 
                                         <Button x:Name="OpenMissionFileFolder" ToolTip="Open the Mission File folder" Margin="0 5 0 0">
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="../Images/arma3.png" Height="30"/>
+                                                <iconPacks:PackIconMaterial Kind="FileMultiple" VerticalAlignment="Center"/>
 
                                                 <TextBlock Text="Mission File Folder" VerticalAlignment="Center" Margin="2 0 0 0"/>
                                             </StackPanel>

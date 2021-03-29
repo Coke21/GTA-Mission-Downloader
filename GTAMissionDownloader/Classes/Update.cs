@@ -6,8 +6,10 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using GTAMissionDownloader.Models;
 using GTAMissionDownloader.ViewModels;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace GTAMissionDownloader.Classes
 {
@@ -143,7 +145,6 @@ namespace GTAMissionDownloader.Classes
                 if (_mvm.IsUpdateNotifyChecked)
                 {
                     var result = System.Windows.Forms.MessageBox.Show("A new update for GTA program has been detected. Download it?", "Update", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Information);
-
                     if (result == System.Windows.Forms.DialogResult.Yes)
                         await Download.FileAsync(Properties.ProgramId, null, Helper.CtsStopDownloading.Token, Download.Option.ProgramUpdate);
                 }
@@ -178,21 +179,38 @@ namespace GTAMissionDownloader.Classes
         {
             while (true)
             {
-                await CheckFilesAsync(Helper.CtsOnStart.Token);
-
-                var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked).ToList();
-                foreach (var item in checkedItems)
+                try
                 {
-                    string status = await CheckItemAsync(item.Mission, item.FileId);
-
-                    if (status.Equals("Updated")) 
+                    if (_mvm.IsProgressBarVisible == Visibility.Visible)
+                    {
+                        await Task.Delay(300_000);
                         continue;
+                    }
 
-                    await Download.FileAsync(item.FileId, item, Helper.CtsStopDownloading.Token);
+                    await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.Indeterminate));
+
+                    await CheckFilesAsync(Helper.CtsOnStart.Token);
+
+                    var checkedItems = _mvm.MissionItems.Where(ps => ps.IsChecked).ToList();
+                    foreach (var item in checkedItems)
+                    {
+                        string status = await CheckItemAsync(item.Mission, item.FileId);
+                        if (status.Equals("Updated")) 
+                            continue;
+
+                        await Download.FileAsync(item.FileId, item, Helper.CtsStopDownloading.Token);
+                    }
+
+                    await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress));
+
+                    //5 min - 300_000
+                    await Task.Delay(300_000);
                 }
-
-                //5 min - 300_000
-                await Task.Delay(300_000);
+                catch (Exception)
+                {
+                    _mvm.IsLvEnabled = true;
+                    await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress));
+                }
             }
         }
     }

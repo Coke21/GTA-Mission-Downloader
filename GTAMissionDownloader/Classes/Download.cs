@@ -4,9 +4,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using Google.Apis.Download;
 using GTAMissionDownloader.Models;
 using GTAMissionDownloader.ViewModels;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace GTAMissionDownloader.Classes
 {
@@ -46,7 +48,7 @@ namespace GTAMissionDownloader.Classes
             await using (MemoryStream stream = new MemoryStream())
             await using (FileStream file = new FileStream(option == Option.MissionFile ? mFPath : programPath, FileMode.Create, FileAccess.Write))
             {
-                request.MediaDownloader.ProgressChanged += progress =>
+                request.MediaDownloader.ProgressChanged += async progress =>
                 {
                     switch (progress.Status)
                     {
@@ -55,50 +57,54 @@ namespace GTAMissionDownloader.Classes
                             double currentValue = Math.Truncate(bytesIn / 1000000);
                             double totalValue = Math.Truncate((double)requestedFile.Size / 1000000);
 
+                            await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.Normal));
+                            await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressValue((int)currentValue, (int)totalValue));
+
                             _mvm.ProgressBarValue = Convert.ToDouble(progress.BytesDownloaded * 100 / requestedFile.Size);
                             _mvm.DownloadInfoText = $"Downloading '{requestedFile.Name}' - " + currentValue + "MB/" + totalValue + "MB";
                             break;
 
                         case DownloadStatus.Failed:
-                            if (selectedItem != null)
-                            {
-                                selectedItem.IsMissionUpdated = "Outdated";
-                                selectedItem.IsModifiedTimeUpdated = "Outdated";
-                            }
+                            selectedItem.IsMissionUpdated = "Outdated";
+                            selectedItem.IsModifiedTimeUpdated = "Outdated";
 
-                            _mvm.MfRowHeight = new GridLength(0);
-                            _mvm.ProgressBarValue = 0;
-                            _mvm.IsProgressBarVisible = Visibility.Hidden;
-                            _mvm.DownloadInfoText = string.Empty;
-                            _mvm.IsStopDownloadVisible = Visibility.Hidden;
+                            await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.Error));
+                            await Task.Delay(500);
+                            await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress));
                             break;
 
                         case DownloadStatus.Completed:
                             stream.WriteTo(file);
 
-                            if (selectedItem != null)
-                            {
-                                selectedItem.IsMissionUpdated = "Updated";
-                                selectedItem.IsModifiedTimeUpdated = "Updated";
-                            }
+                            selectedItem.IsMissionUpdated = "Updated";
+                            selectedItem.IsModifiedTimeUpdated = "Updated";
 
-                            _mvm.MfRowHeight = new GridLength(0);
-                            _mvm.ProgressBarValue = 0;
-                            _mvm.IsProgressBarVisible = Visibility.Hidden;
-                            _mvm.DownloadInfoText = string.Empty;
-                            _mvm.IsStopDownloadVisible = Visibility.Hidden;
+                            await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress));
                             break;
                     }
                 };
+
                 try
                 {
                     await request.DownloadAsync(stream, cancellationToken);
                 }
                 catch (TaskCanceledException)
                 {
+                    _mvm.MfRowHeight = new GridLength(0);
+                    _mvm.ProgressBarValue = 0;
+                    _mvm.IsProgressBarVisible = Visibility.Hidden;
+                    _mvm.DownloadInfoText = string.Empty;
+                    _mvm.IsStopDownloadVisible = Visibility.Hidden;
+
                     return;
                 }
             }
+
+            _mvm.MfRowHeight = new GridLength(0);
+            _mvm.ProgressBarValue = 0;
+            _mvm.IsProgressBarVisible = Visibility.Hidden;
+            _mvm.DownloadInfoText = string.Empty;
+            _mvm.IsStopDownloadVisible = Visibility.Hidden;
 
             if (option == Option.ProgramUpdate)
             {

@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 using Caliburn.Micro;
 using ControlzEx.Theming;
 using GTADownloader;
@@ -17,6 +18,7 @@ using GTAMissionDownloader.Classes;
 using GTAMissionDownloader.Models;
 using GTAMissionDownloader.Views;
 using Hardcodet.Wpf.TaskbarNotification;
+using Microsoft.WindowsAPICodePack.Taskbar;
 using Point = System.Windows.Point;
 
 namespace GTAMissionDownloader.ViewModels
@@ -203,6 +205,8 @@ namespace GTAMissionDownloader.ViewModels
 
         public async Task CloseApp() => await TryCloseAsync();
 
+        public TaskbarManager TaskbarManager { get; set; } = TaskbarManager.Instance;
+
         private int _tabControlSelectedIndex;
         public int TabControlSelectedIndex
         {
@@ -339,13 +343,6 @@ namespace GTAMissionDownloader.ViewModels
 
         public async Task DownloadMission()
         {
-            var checkedItems = MissionItems.Where(ps => ps.IsChecked).ToList();
-            if (checkedItems.Any())
-            {
-                MessageBox.Show("If you want to manually download mission files, you have to untick any checked mission files!", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
             if (IsStopDownloadVisible == Visibility.Visible)
             {
                 MessageBox.Show("Only one download instance is allowed!", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
