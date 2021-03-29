@@ -154,8 +154,13 @@ namespace GTAMissionDownloader.ViewModels
                 }
         }
 
+        private Mutex MyMutex { get; set; }
         public async Task WindowLoaded()
         {
+            MyMutex = new Mutex(true, "GTADownloaderOneInstance", out bool isNewInstance);
+            if (!isNewInstance)
+                await TryCloseAsync();
+
             new Join(this, _tsViewModel);
 
             if (Accents.Count == 0)
