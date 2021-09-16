@@ -31,6 +31,7 @@ namespace GTAMissionDownloader.Classes
             listRequest.Q = $"'{Properties.FolderId}' in parents";
 
             Google.Apis.Drive.v3.Data.FileList files = null;
+
             try
             {
                 files = await listRequest.ExecuteAsync();

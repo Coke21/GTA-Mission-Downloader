@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shell;
 using Caliburn.Micro;
 using ControlzEx.Theming;
 using GTADownloader;
@@ -96,6 +95,9 @@ namespace GTAMissionDownloader.ViewModels
         private TsViewModel _tsViewModel;
         public MainViewModel()
         {
+            if (Helper.Service.HttpClient.DefaultRequestHeaders.Contains("X-Goog-Drive-Resource-Keys") == false)
+                Helper.Service.HttpClient.DefaultRequestHeaders.Add("X-Goog-Drive-Resource-Keys", $"{Properties.FolderId}/{Properties.ResourceKey}");
+
             WindowState = WindowState.Normal;
             IsUpdateVisible = Visibility.Hidden;
             MfRowHeight = new GridLength(0);

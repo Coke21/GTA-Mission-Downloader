@@ -7,6 +7,7 @@ namespace GTAMissionDownloader.Classes
     {
         public static string AppVersion { get; } = "1.3";
         public static string FolderId { get; } = "0B8j-xMQtDZvwVjN6R25sWF94dG8";
+        public static string ResourceKey { get; } = "0-CzTSvP40Gx6WoKQ3CiVMXw";
 
         //Dev
         //public static string ProgramId { get; } = "1w4UUHr4MyMSXjpbz_bCYFsk9smQwSjxa";

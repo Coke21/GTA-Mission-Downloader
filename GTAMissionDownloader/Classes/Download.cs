@@ -76,8 +76,11 @@ namespace GTAMissionDownloader.Classes
                         case DownloadStatus.Completed:
                             stream.WriteTo(file);
 
-                            selectedItem.IsMissionUpdated = "Updated";
-                            selectedItem.IsModifiedTimeUpdated = "Updated";
+                            if (selectedItem != null)
+                            {
+                                selectedItem.IsMissionUpdated = "Updated";
+                                selectedItem.IsModifiedTimeUpdated = "Updated";
+                            }
 
                             await Application.Current.Dispatcher.BeginInvoke(() => _mvm.TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress));
                             break;
